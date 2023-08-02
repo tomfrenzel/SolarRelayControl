@@ -1,10 +1,11 @@
-﻿using EasyModbus;
+﻿using NModbus;
 using SolarHeaterControl.Server;
 using SolarHeaterControl.Shared.Models;
+using System.Net.Sockets;
 
 namespace SolarHeaterControl.Client
 {
-    public class ControlService : IHostedService, IDisposable
+    public class ControlService : BackgroundService
     {
         public static Settings Settings { get; set; } = new Settings
         {
@@ -19,7 +20,6 @@ namespace SolarHeaterControl.Client
         private readonly LogStore _logStore;
         private readonly HttpClient _httpClient;
         private readonly Uri _relayBaseUri = new UriBuilder("http", Settings.RelayIp, 80, "activate").Uri;
-        private Timer? _timer = null;
 
         public ControlService(LogStore logStore)
         {
@@ -27,96 +27,56 @@ namespace SolarHeaterControl.Client
             _httpClient = new HttpClient();
         }
 
-        public Task StartAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _timer = new Timer(DoWork, null, TimeSpan.Zero,
-                TimeSpan.FromSeconds(Settings.RefreshPeriod));
-
-            return Task.CompletedTask;
-        }
-
-        private void DoWork(object? state)
-        {
-            var modbusClient = new ModbusClient(Settings.InverterIp, Settings.InverterPort);
-            var power = GetValueFromRegister(modbusClient, 32064, 2, 1) / 1000;
-            var soc = GetValueFromRegister(modbusClient, 37760, 1, 0) / 10;
-
-            if (power >= Settings.PowerThreshold && soc >= Settings.SocThreshold)
+            using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromSeconds(Settings.RefreshPeriod));
+            while (
+                !stoppingToken.IsCancellationRequested &&
+                await timer.WaitForNextTickAsync(stoppingToken))
             {
-                _httpClient.GetAsync(_relayBaseUri);
-                _logStore.AddLogEntry(new LogEntry
-                {
-                    Timestamp = DateTimeOffset.Now,
-                    CurrentPower = power,
-                    CurrentSoc = soc,
-                    Action = RelaisAction.PowerOn
-                });
-            }
-            else
-            {
-                _httpClient.GetAsync(_relayBaseUri);
-                _logStore.AddLogEntry(new LogEntry
-                {
-                    Timestamp = DateTimeOffset.Now,
-                    CurrentPower = power,
-                    CurrentSoc = soc,
-                    Action = RelaisAction.PowerOff
-                });
-            }
-        }
+                var power = await GetValueFromRegister(32064, 2, 1) / 1000;
+                var soc = await GetValueFromRegister(37760, 1, 0) / 10;
 
-        private int GetValueFromRegister(ModbusClient modbusClient, int address, int quantity, int position)
-        {
-            Thread.Sleep(1000);
-            modbusClient.Connect();
-
-            var value = 1;
-            var valueReadoutSuccess = false;
-            while (!valueReadoutSuccess)
-            {
-                try
+                if (power >= Settings.PowerThreshold && soc >= Settings.SocThreshold)
                 {
-                    Thread.Sleep(1000);
-                    var res = modbusClient.ReadHoldingRegisters(address, quantity);
-                    if (res.Length == quantity)
+                    _httpClient.GetAsync(_relayBaseUri);
+                    _logStore.AddLogEntry(new LogEntry
                     {
-                        var newValue = res[position];
-                        if (newValue == 0)
-                        {
-                            if (value == 0)
-                            {
-                                valueReadoutSuccess = true;
-                            }
-                            else
-                            {
-                                value = 0;
-                                valueReadoutSuccess = false;
-                            }
-                        }
-                        else
-                        {
-                            value = newValue;
-                            valueReadoutSuccess = true;
-                        }
-                    }
+                        Timestamp = DateTimeOffset.Now,
+                        CurrentPower = power,
+                        CurrentSoc = soc,
+                        Action = RelaisAction.PowerOn
+                    });
                 }
-                catch (Exception) { }
+                else
+                {
+                    _httpClient.GetAsync(_relayBaseUri);
+                    _logStore.AddLogEntry(new LogEntry
+                    {
+                        Timestamp = DateTimeOffset.Now,
+                        CurrentPower = power,
+                        CurrentSoc = soc,
+                        Action = RelaisAction.PowerOff
+                    });
+                }
             }
-
-            modbusClient.Disconnect();
-            return value;
         }
 
-        public Task StopAsync(CancellationToken stoppingToken)
-        {
-            _timer?.Change(Timeout.Infinite, 0);
 
-            return Task.CompletedTask;
-        }
 
-        public void Dispose()
+        private async Task<int> GetValueFromRegister(ushort address, ushort quantity, int position)
         {
-            _timer?.Dispose();
+            using (var client = new TcpClient(Settings.InverterIp, Settings.InverterPort))
+            {
+                var factory = new ModbusFactory();
+                IModbusMaster master = factory.CreateMaster(client);
+
+                Thread.Sleep(1000);
+                var registers = await master.ReadHoldingRegistersAsync(1, address, quantity);
+                Thread.Sleep(1000);
+
+                return registers[position];
+            };
         }
     }
 }
