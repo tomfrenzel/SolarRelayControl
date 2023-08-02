@@ -1,13 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SolarHeaterControlApp
+namespace SolarHeaterControl.Shared.Models
 {
-    public class SettingsModel
+    public class Settings
     {
-        [Required]
-        [RegularExpression(@"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$", ErrorMessage = "Eingabe hat ein falsches Format")]
-        public string? ServerIp { get; set; }
-
         [Required]
         [RegularExpression(@"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$", ErrorMessage = "Eingabe hat ein falsches Format")]
         public string? InverterIp { get; set; }
@@ -17,16 +13,16 @@ namespace SolarHeaterControlApp
         public string? RelayIp { get; set; }
 
         [Required]
-        public int? InverterPort { get; set; }
+        public int InverterPort { get; set; } = 502;
 
         [Required]
-        public int? RefreshPeriod { get; set; }
+        public int RefreshPeriod { get; set; } = 10;
 
         [Required]
         public int? PowerThreshold { get; set; }
 
         [Required]
-        [Range(0,100, ErrorMessage = "Der Wert muss zwischen 0 und 100 liegen")]
+        [Range(0, 100, ErrorMessage = "Der Wert muss zwischen 0 und 100 liegen")]
         public int? SocThreshold { get; set; }
     }
 }

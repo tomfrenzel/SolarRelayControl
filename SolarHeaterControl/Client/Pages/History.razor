@@ -1,0 +1,47 @@
+﻿@page "/history"
+@using SolarHeaterControl.Shared.Models
+@inject HttpClient Http
+
+<PageTitle>Historie</PageTitle>
+
+<h1>Historie</h1>
+
+<p>Log einträge</p>
+
+@if (logs == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Zeitpunkt</th>
+                <th>PV Leistung (kW)</th>
+                <th>Akku-Füllstand (%)</th>
+                <th>Aktion</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in logs)
+            {
+                <tr>
+                    <td>@forecast.Timestamp</td>
+                    <td>@forecast.CurrentPower</td>
+                    <td>@forecast.CurrentSoc</td>
+                    <td>@forecast.Action.ToString()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private LogEntry[]? logs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        logs = await Http.GetFromJsonAsync<LogEntry[]>("History");
+    }
+}

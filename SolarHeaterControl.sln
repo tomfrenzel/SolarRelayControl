@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.33711.374
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SolarHeaterControlApi", "SolarHeaterControl\SolarHeaterControlApi.csproj", "{B21C8F66-3ECB-4AF5-AE6A-FC454141BA3C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolarHeaterControl.Server", "SolarHeaterControl\Server\SolarHeaterControl.Server.csproj", "{963EB447-4D6D-44F4-87A6-62B875D33A45}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolarHeaterControlApp", "SolarHeaterControlApp\SolarHeaterControlApp.csproj", "{713EA3F0-ED94-43F8-846E-4A337E18958B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolarHeaterControl.Client", "SolarHeaterControl\Client\SolarHeaterControl.Client.csproj", "{3E5DCE6B-B731-4118-872F-863948BEB1A0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolarHeaterControl.Shared", "SolarHeaterControl\Shared\SolarHeaterControl.Shared.csproj", "{DAF9FBBA-91CF-4604-BB34-09D27988EC80}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +15,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B21C8F66-3ECB-4AF5-AE6A-FC454141BA3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B21C8F66-3ECB-4AF5-AE6A-FC454141BA3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B21C8F66-3ECB-4AF5-AE6A-FC454141BA3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B21C8F66-3ECB-4AF5-AE6A-FC454141BA3C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{713EA3F0-ED94-43F8-846E-4A337E18958B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{713EA3F0-ED94-43F8-846E-4A337E18958B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{713EA3F0-ED94-43F8-846E-4A337E18958B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{713EA3F0-ED94-43F8-846E-4A337E18958B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{963EB447-4D6D-44F4-87A6-62B875D33A45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{963EB447-4D6D-44F4-87A6-62B875D33A45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{963EB447-4D6D-44F4-87A6-62B875D33A45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{963EB447-4D6D-44F4-87A6-62B875D33A45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E5DCE6B-B731-4118-872F-863948BEB1A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E5DCE6B-B731-4118-872F-863948BEB1A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E5DCE6B-B731-4118-872F-863948BEB1A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E5DCE6B-B731-4118-872F-863948BEB1A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAF9FBBA-91CF-4604-BB34-09D27988EC80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAF9FBBA-91CF-4604-BB34-09D27988EC80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAF9FBBA-91CF-4604-BB34-09D27988EC80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAF9FBBA-91CF-4604-BB34-09D27988EC80}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

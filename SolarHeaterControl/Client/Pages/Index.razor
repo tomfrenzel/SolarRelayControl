@@ -1,30 +1,23 @@
 ﻿@page "/"
+@using SolarHeaterControl.Shared.Models;
+@inject HttpClient Http
 
 <PageTitle>Einstellungen</PageTitle>
 
 <h1>Einstellungen</h1>
 
-<EditForm Model="@exampleModel" OnValidSubmit="@HandleValidSubmit">
+<EditForm Model="@settings" OnValidSubmit="@HandleValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
     <hr />
     <div class="form-group">
         <label for="firstName" class="col-sm-8 col-form-label">
-            Server IP
-        </label>
-        <div class="col-sm-4">
-            <InputText id="serverIp" class="form-control" placeholder="192.168.1.1"
-            @bind-Value="exampleModel.ServerIp" />
-        </div>
-    </div>    
-    <div class="form-group">
-        <label for="firstName" class="col-sm-8 col-form-label">
             Relais IP
         </label>
         <div class="col-sm-4">
             <InputText id="relayIp" class="form-control" placeholder="192.168.1.1"
-            @bind-Value="exampleModel.RelayIp" />
+            @bind-Value="settings.RelayIp" />
         </div>
     </div>
     <div class="form-group">
@@ -33,7 +26,7 @@
         </label>
         <div class="col-sm-4">
             <InputText id="inverterIp" class="form-control" placeholder="192.168.1.1"
-            @bind-Value="exampleModel.InverterIp" />
+            @bind-Value="settings.InverterIp" />
         </div>
     </div>
     <div class="form-group">
@@ -42,7 +35,7 @@
         </label>
         <div class="col-sm-4">
             <InputNumber id="inverterPort" class="form-control" placeholder="502"
-            @bind-Value="exampleModel.InverterPort" />
+            @bind-Value="settings.InverterPort" />
         </div>
     </div>
     <div class="form-group">
@@ -51,7 +44,7 @@
         </label>
         <div class="col-sm-4">
             <InputNumber id="refreshPeriod" class="form-control" placeholder="10"
-            @bind-Value="exampleModel.RefreshPeriod" />
+            @bind-Value="settings.RefreshPeriod" />
         </div>
     </div>
     <div class="form-group">
@@ -60,7 +53,7 @@
         </label>
         <div class="col-sm-4">
             <InputNumber id="powerThreshold" class="form-control" placeholder="3"
-            @bind-Value="exampleModel.PowerThreshold" />
+            @bind-Value="settings.PowerThreshold" />
         </div>
     </div>
     <div class="form-group">
@@ -69,7 +62,7 @@
         </label>
         <div class="col-sm-4">
             <InputNumber id="socThroshold" class="form-control" placeholder="50"
-            @bind-Value="exampleModel.SocThreshold" />
+            @bind-Value="settings.SocThreshold" />
         </div>
     </div>
 
@@ -79,11 +72,16 @@
 </EditForm>
 
 @code {
-    private SettingsModel exampleModel = new();
+    private Settings? settings = new();
 
-    private void HandleValidSubmit()
+    protected override async Task OnInitializedAsync()
+    {
+        settings = await Http.GetFromJsonAsync<Settings>("Settings");
+    }
+
+    private async Task HandleValidSubmit()
     {
 
-        // Process the valid form
+        await Http.PostAsJsonAsync("Settings", settings);
     }
 }
