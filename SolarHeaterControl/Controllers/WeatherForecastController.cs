@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace SolarHeaterControl.Controllers
+namespace SolarHeaterControlApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]

@@ -1,4 +1,4 @@
-namespace SolarHeaterControl
+namespace SolarHeaterControlApi
 {
     public class WeatherForecast
     {

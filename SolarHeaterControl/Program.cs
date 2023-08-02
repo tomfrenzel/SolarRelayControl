@@ -1,4 +1,4 @@
-using SolarHeaterControl;
+using SolarHeaterControlApi;
 
 var builder = WebApplication.CreateBuilder(args);
 

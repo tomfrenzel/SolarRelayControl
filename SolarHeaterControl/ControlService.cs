@@ -1,21 +1,27 @@
 ﻿using EasyModbus;
 
-namespace SolarHeaterControl
+namespace SolarHeaterControlApi
 {
     public class ControlService : IHostedService, IDisposable
     {
         public static int RefreshPeriod = 10;
+        public static string RelayIp = "192.168.3.153";
         public static string InverterIp = "192.168.3.152";
         public static int InverterPort = 502;
+        public static int PowerThreshold = 2;
+        public static int SocThreshold = 50;
 
         private readonly ILogger<ControlService> _logger;
-        private readonly ModbusClient _client;
+        private readonly ModbusClient _modbusClient;
+        private readonly HttpClient _httpClient;
+        private readonly Uri _relayBaseUri = new UriBuilder("http", RelayIp, 80, "activate").Uri;
         private Timer? _timer = null;
 
         public ControlService(ILogger<ControlService> logger)
         {
             _logger = logger;
-            _client = new ModbusClient(InverterIp, InverterPort);
+            _modbusClient = new ModbusClient(InverterIp, InverterPort);
+            _httpClient = new HttpClient();
         }
 
         public Task StartAsync(CancellationToken stoppingToken)
@@ -31,17 +37,28 @@ namespace SolarHeaterControl
         private void DoWork(object? state)
         {
             var power = GetValueFromRegister(32064, 2, 1) / 1000;
-            var soc = GetValueFromRegister(37760, 1, 0) / 10;
-
             _logger.LogInformation($"Power: {power}kw");
+
+            var soc = GetValueFromRegister(37760, 1, 0) / 10;
             _logger.LogInformation($"SOC: {soc}%");
+
+            if (power >= PowerThreshold && soc >= SocThreshold)
+            {
+                _httpClient.GetAsync(_relayBaseUri);
+                _logger.LogInformation("Heater started!");
+            }
+            else
+            {
+                _httpClient.GetAsync(_relayBaseUri);
+                _logger.LogInformation("Heater stopped!");
+            }
         }
 
-        private int GetValueFromRegister(int address, int qunatity, int position)
+        private int GetValueFromRegister(int address, int quantity, int position)
         {
-            _client.Disconnect();
+            _modbusClient.Disconnect();
             Thread.Sleep(1000);
-            _client.Connect();
+            _modbusClient.Connect();
 
             var value = 1;
             var valueReadoutSuccess = false;
@@ -50,8 +67,8 @@ namespace SolarHeaterControl
                 try
                 {
                     Thread.Sleep(1000);
-                    var res = _client.ReadHoldingRegisters(address, qunatity);
-                    if (res.Length == qunatity)
+                    var res = _modbusClient.ReadHoldingRegisters(address, quantity);
+                    if (res.Length == quantity)
                     {
                         var newValue = res[position];
                         if (newValue == 0)
@@ -76,7 +93,7 @@ namespace SolarHeaterControl
                 catch (Exception) { }
             }
 
-            _client.Disconnect();
+            _modbusClient.Disconnect();
             return value;
         }
 
