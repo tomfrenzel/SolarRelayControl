@@ -10,7 +10,7 @@
 
 @if (logs == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>Laden...</em></p>
 }
 else
 {
@@ -24,13 +24,13 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var forecast in logs)
+            @foreach (var entry in logs)
             {
                 <tr>
-                    <td>@forecast.Timestamp</td>
-                    <td>@forecast.CurrentPower</td>
-                    <td>@forecast.CurrentSoc</td>
-                    <td>@forecast.Action.ToString()</td>
+                    <td>@entry.Timestamp.ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@entry.CurrentPower</td>
+                    <td>@entry.CurrentSoc</td>
+                    <td>@entry.Action.ToString()</td>
                 </tr>
             }
         </tbody>
@@ -43,5 +43,6 @@ else
     protected override async Task OnInitializedAsync()
     {
         logs = await Http.GetFromJsonAsync<LogEntry[]>("History");
+        logs = logs?.OrderByDescending(l => l.Timestamp).ToArray();
     }
 }

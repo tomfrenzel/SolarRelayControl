@@ -11,8 +11,9 @@ namespace SolarHeaterControl.Client
         private readonly IConfiguration configuration;
         private readonly HttpClient _httpClient;
 
-        private Uri _relayBaseUri => new UriBuilder("http", Settings.RelayIp, 80, "activate").Uri;
+        private Uri _relayBaseUri => new UriBuilder("http", Settings.RelayIp, 80, "relay/0").Uri;
         private Settings Settings => configuration.Get<Settings>();
+        private record struct RelayResponse(bool ison);
 
         public ControlService(LogStore logStore, IConfiguration configuration)
         {
@@ -23,40 +24,45 @@ namespace SolarHeaterControl.Client
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromSeconds(Settings.RefreshPeriod));
+            using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMinutes(Settings.RefreshPeriod));
             while (
                 !stoppingToken.IsCancellationRequested &&
                 await timer.WaitForNextTickAsync(stoppingToken))
             {
-                var power = await GetValueFromRegister(32064, 2, 1) / 1000;
-                var soc = await GetValueFromRegister(37760, 1, 0) / 10;
+                var power = await getValueFromRegister(32064, 2, 1) / 1000;
+                var soc = await getValueFromRegister(37760, 1, 0) / 10;
+
+                var result = await _httpClient.GetAsync(_relayBaseUri);
+                var currentState = await result.Content.ReadFromJsonAsync<RelayResponse>();
 
                 if (power >= Settings.PowerThreshold && soc >= Settings.SocThreshold)
                 {
-                    await _httpClient.GetAsync(_relayBaseUri);
-                    _logStore.AddLogEntry(new LogEntry
+                    if (currentState.ison)
                     {
-                        Timestamp = DateTimeOffset.Now,
-                        CurrentPower = power,
-                        CurrentSoc = soc,
-                        Action = RelaisAction.PowerOn
-                    });
+                        createLog(power, soc);
+                    }
+                    else
+                    {
+                        await setRelayState("on");
+                        createLog(power, soc, RelayAction.Anschalten);
+                    }
                 }
                 else
                 {
-                    await _httpClient.GetAsync(_relayBaseUri);
-                    _logStore.AddLogEntry(new LogEntry
+                    if (currentState.ison)
                     {
-                        Timestamp = DateTimeOffset.Now,
-                        CurrentPower = power,
-                        CurrentSoc = soc,
-                        Action = RelaisAction.PowerOff
-                    });
+                        await setRelayState("off");
+                        createLog(power, soc, RelayAction.Ausschalten);
+                    }
+                    else
+                    {
+                        createLog(power, soc);
+                    }
                 }
             }
         }
 
-        private async Task<int> GetValueFromRegister(ushort address, ushort quantity, int position)
+        private async Task<int> getValueFromRegister(ushort address, ushort quantity, int position)
         {
             using (var client = new TcpClient(Settings.InverterIp, Settings.InverterPort))
             {
@@ -69,6 +75,25 @@ namespace SolarHeaterControl.Client
 
                 return registers[position];
             };
+        }
+
+        private async Task setRelayState(string state)
+        {
+            var uri = new UriBuilder(_relayBaseUri);
+            uri.Query = $"turn={state}";
+
+            await _httpClient.GetAsync(uri.Uri);
+        }
+
+        private void createLog(int power, int soc, RelayAction? action = null)
+        {
+            _logStore.AddLogEntry(new LogEntry
+            {
+                Timestamp = DateTimeOffset.Now,
+                CurrentPower = power,
+                CurrentSoc = soc,
+                Action = action
+            });
         }
     }
 }
