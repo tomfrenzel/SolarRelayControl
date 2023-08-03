@@ -1,10 +1,9 @@
-using Microsoft.AspNetCore.ResponseCompression;
 using SolarHeaterControl.Client;
 using SolarHeaterControl.Server;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
+builder.Configuration.SetBasePath(builder.Environment.ContentRootPath);
+builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -12,7 +11,6 @@ builder.Services.AddSingleton<LogStore>();
 builder.Services.AddHostedService<ControlService>();
 
 var app = builder.Build();
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

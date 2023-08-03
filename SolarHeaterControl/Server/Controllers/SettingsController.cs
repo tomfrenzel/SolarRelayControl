@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SolarHeaterControl.Client;
+using SolarHeaterControl.Server.Extensions;
 using SolarHeaterControl.Shared.Models;
 
 namespace SolarHeaterControl.Server.Controllers
@@ -8,20 +8,23 @@ namespace SolarHeaterControl.Server.Controllers
     [Route("[controller]")]
     public class SettingsController : ControllerBase
     {
-        public SettingsController()
+        private readonly IConfiguration configuration;
+
+        public SettingsController(IConfiguration configuration)
         {
+            this.configuration = configuration;
         }
 
         [HttpGet]
         public async Task<Settings> Get()
         {
-            return ControlService.Settings;
+            return configuration.Get<Settings>();
         }
 
         [HttpPost]
         public async Task Update(Settings settings)
         {
-            ControlService.Settings = settings;
+            configuration.Set(settings);
         }
     }
 }

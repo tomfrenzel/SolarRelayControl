@@ -7,23 +7,17 @@ namespace SolarHeaterControl.Client
 {
     public class ControlService : BackgroundService
     {
-        public static Settings Settings { get; set; } = new Settings
-        {
-            RefreshPeriod = 10,
-            RelayIp = "192.168.3.153",
-            InverterIp = "192.168.3.152",
-            InverterPort = 502,
-            PowerThreshold = 2,
-            SocThreshold = 50
-        };
-
         private readonly LogStore _logStore;
+        private readonly IConfiguration configuration;
         private readonly HttpClient _httpClient;
-        private readonly Uri _relayBaseUri = new UriBuilder("http", Settings.RelayIp, 80, "activate").Uri;
 
-        public ControlService(LogStore logStore)
+        private Uri _relayBaseUri => new UriBuilder("http", Settings.RelayIp, 80, "activate").Uri;
+        private Settings Settings => configuration.Get<Settings>();
+
+        public ControlService(LogStore logStore, IConfiguration configuration)
         {
             this._logStore = logStore;
+            this.configuration = configuration;
             _httpClient = new HttpClient();
         }
 
@@ -39,7 +33,7 @@ namespace SolarHeaterControl.Client
 
                 if (power >= Settings.PowerThreshold && soc >= Settings.SocThreshold)
                 {
-                    _httpClient.GetAsync(_relayBaseUri);
+                    await _httpClient.GetAsync(_relayBaseUri);
                     _logStore.AddLogEntry(new LogEntry
                     {
                         Timestamp = DateTimeOffset.Now,
@@ -50,7 +44,7 @@ namespace SolarHeaterControl.Client
                 }
                 else
                 {
-                    _httpClient.GetAsync(_relayBaseUri);
+                    await _httpClient.GetAsync(_relayBaseUri);
                     _logStore.AddLogEntry(new LogEntry
                     {
                         Timestamp = DateTimeOffset.Now,
@@ -61,8 +55,6 @@ namespace SolarHeaterControl.Client
                 }
             }
         }
-
-
 
         private async Task<int> GetValueFromRegister(ushort address, ushort quantity, int position)
         {
