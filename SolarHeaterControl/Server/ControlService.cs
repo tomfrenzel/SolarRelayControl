@@ -1,6 +1,7 @@
 ﻿using NModbus;
 using SolarHeaterControl.Server;
 using SolarHeaterControl.Shared.Models;
+using System;
 using System.Net.Sockets;
 
 namespace SolarHeaterControl.Client
@@ -24,42 +25,52 @@ namespace SolarHeaterControl.Client
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMinutes(Settings.RefreshPeriod));
+            using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromSeconds(20));
             while (
                 !stoppingToken.IsCancellationRequested &&
                 await timer.WaitForNextTickAsync(stoppingToken))
             {
-                var power = await getValueFromRegister(32064, 2, 1) / 1000;
-                var soc = await getValueFromRegister(37760, 1, 0) / 10;
-
-                var result = await _httpClient.GetAsync(_relayBaseUri);
-                var currentState = await result.Content.ReadFromJsonAsync<RelayResponse>();
-
-                if (power >= Settings.PowerThreshold && soc >= Settings.SocThreshold)
+                try
                 {
-                    if (currentState.ison)
+                    var power = await getValueFromRegister(32064, 2, 1) / 1000;
+                    var soc = await getValueFromRegister(37760, 1, 0) / 10;
+
+                    var result = await _httpClient.GetAsync(_relayBaseUri);
+                    var currentState = await result.Content.ReadFromJsonAsync<RelayResponse>();
+
+                    if (power >= Settings.PowerThreshold && soc >= Settings.SocThreshold)
                     {
-                        createLog(power, soc);
+                        if (!currentState.ison)
+                        {
+                            await setRelayState("on");
+                            createLog(power, soc, RelayAction.Anschalten);
+                        }
                     }
                     else
                     {
-                        await setRelayState("on");
-                        createLog(power, soc, RelayAction.Anschalten);
+                        if (currentState.ison)
+                        {
+                            await setRelayState("off");
+                            createLog(power, soc, RelayAction.Ausschalten);
+                        }
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    if (currentState.ison)
+                    if (_logStore.GetLogs().LastOrDefault()?.ErrorMessage == ex.Message)
                     {
-                        await setRelayState("off");
-                        createLog(power, soc, RelayAction.Ausschalten);
-                    }
-                    else
-                    {
-                        createLog(power, soc);
+                        _logStore.AddLogEntry(new LogEntry
+                        {
+                            Timestamp = DateTimeOffset.Now,
+                            CurrentPower = null,
+                            CurrentSoc = null,
+                            Action = null,
+                            ErrorMessage = ex.Message
+                        });
                     }
                 }
-            }
+                }
+                
         }
 
         private async Task<double> getValueFromRegister(ushort address, ushort quantity, int position)

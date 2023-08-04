@@ -26,11 +26,14 @@ else
         <tbody>
             @foreach (var entry in logs)
             {
+                var currentPower = entry.CurrentPower?.ToString()?? "-";
+                var currentSoc = entry.CurrentSoc?.ToString() ?? "-";
+                var message = entry.Action?.ToString() ?? entry.ErrorMessage?.ToString() ?? string.Empty;
                 <tr>
-                    <td>@entry.Timestamp.ToString("dd.MM.yyyy HH:mm")</td>
-                    <td>@entry.CurrentPower kW</td>
-                    <td>@entry.CurrentSoc %</td>
-                    <td>@entry.Action.ToString()</td>
+                    <td>@entry.Timestamp.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@currentPower kW</td>
+                    <td>@currentSoc %</td>
+                    <td>@message</td>
                 </tr>
             }
         </tbody>
