@@ -32,8 +32,13 @@ namespace SolarHeaterControl.Client
             {
                 try
                 {
-                    var power = await getValueFromRegister(32064, 2, 1) / 1000;
-                    var soc = await getValueFromRegister(37760, 1, 0) / 10;
+                    double power = 0;
+                    for (byte inverterNumber = 1; inverterNumber <= Settings.InverterCount; inverterNumber++)
+                    {
+                        power += await getValueFromRegister(inverterNumber, 32064, 2, 1) / 1000;
+                    }
+
+                    var soc = await getValueFromRegister(1, 37760, 1, 0) / 10;
 
                     var result = await _httpClient.GetAsync(_relayBaseUri);
                     var currentState = await result.Content.ReadFromJsonAsync<RelayResponse>();
@@ -57,7 +62,7 @@ namespace SolarHeaterControl.Client
                 }
                 catch (Exception ex)
                 {
-                    if (_logStore.GetLogs().LastOrDefault()?.ErrorMessage == ex.Message)
+                    if (_logStore.GetLogs().LastOrDefault()?.ErrorMessage != ex.Message)
                     {
                         _logStore.AddLogEntry(new LogEntry
                         {
@@ -73,7 +78,7 @@ namespace SolarHeaterControl.Client
                 
         }
 
-        private async Task<double> getValueFromRegister(ushort address, ushort quantity, int position)
+        private async Task<double> getValueFromRegister(byte slaveAddress, ushort address, ushort quantity, int position)
         {
             using (var client = new TcpClient(Settings.InverterIp, Settings.InverterPort))
             {
@@ -81,7 +86,7 @@ namespace SolarHeaterControl.Client
                 IModbusMaster master = factory.CreateMaster(client);
 
                 Thread.Sleep(1000);
-                var registers = await master.ReadHoldingRegistersAsync(1, address, quantity);
+                var registers = await master.ReadHoldingRegistersAsync(slaveAddress, address, quantity);
                 Thread.Sleep(1000);
 
                 return registers[position];

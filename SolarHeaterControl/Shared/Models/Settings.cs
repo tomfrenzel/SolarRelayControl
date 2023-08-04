@@ -16,6 +16,9 @@ namespace SolarHeaterControl.Shared.Models
         public int InverterPort { get; set; } = 502;
 
         [Required]
+        public int InverterCount { get; set; } = 1;
+
+        [Required]
         public int? PowerThreshold { get; set; }
 
         [Required]
