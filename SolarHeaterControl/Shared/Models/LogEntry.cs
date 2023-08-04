@@ -3,8 +3,8 @@
     public class LogEntry
     {
         public DateTimeOffset Timestamp { get; set; }
-        public int CurrentPower { get; set; }
-        public int CurrentSoc { get; set; }
+        public double CurrentPower { get; set; }
+        public double CurrentSoc { get; set; }
         public RelayAction? Action { get; set; }
     }
 }

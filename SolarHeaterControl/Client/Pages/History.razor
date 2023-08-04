@@ -18,8 +18,8 @@ else
         <thead>
             <tr>
                 <th>Zeitpunkt</th>
-                <th>PV Leistung (kW)</th>
-                <th>Akku-Füllstand (%)</th>
+                <th>PV Leistung</th>
+                <th>Akku-Füllstand</th>
                 <th>Aktion</th>
             </tr>
         </thead>
@@ -28,8 +28,8 @@ else
             {
                 <tr>
                     <td>@entry.Timestamp.ToString("dd.MM.yyyy HH:mm")</td>
-                    <td>@entry.CurrentPower</td>
-                    <td>@entry.CurrentSoc</td>
+                    <td>@entry.CurrentPower kW</td>
+                    <td>@entry.CurrentSoc %</td>
                     <td>@entry.Action.ToString()</td>
                 </tr>
             }

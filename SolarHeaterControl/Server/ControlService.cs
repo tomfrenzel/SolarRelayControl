@@ -62,7 +62,7 @@ namespace SolarHeaterControl.Client
             }
         }
 
-        private async Task<int> getValueFromRegister(ushort address, ushort quantity, int position)
+        private async Task<double> getValueFromRegister(ushort address, ushort quantity, int position)
         {
             using (var client = new TcpClient(Settings.InverterIp, Settings.InverterPort))
             {
@@ -85,7 +85,7 @@ namespace SolarHeaterControl.Client
             await _httpClient.GetAsync(uri.Uri);
         }
 
-        private void createLog(int power, int soc, RelayAction? action = null)
+        private void createLog(double power, double soc, RelayAction? action = null)
         {
             _logStore.AddLogEntry(new LogEntry
             {
