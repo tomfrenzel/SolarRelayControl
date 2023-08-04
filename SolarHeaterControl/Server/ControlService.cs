@@ -25,7 +25,7 @@ namespace SolarHeaterControl.Client
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromSeconds(20));
+            using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMinutes(10));
             while (
                 !stoppingToken.IsCancellationRequested &&
                 await timer.WaitForNextTickAsync(stoppingToken))
