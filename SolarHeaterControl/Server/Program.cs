@@ -1,9 +1,16 @@
+using Serilog;
 using SolarHeaterControl.Client;
 using SolarHeaterControl.Server;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.SetBasePath(builder.Environment.ContentRootPath);
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+
+Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console()
+                .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Minute, shared: true)
+                .CreateLogger();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
