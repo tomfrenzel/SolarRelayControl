@@ -1,4 +1,5 @@
 ﻿using NModbus;
+using Serilog;
 using SolarHeaterControl.Server;
 using SolarHeaterControl.Shared.Models;
 using System;
@@ -37,8 +38,10 @@ namespace SolarHeaterControl.Client
                     {
                         power += await getValueFromRegister(inverterNumber, 32064, 2, 1) / 1000;
                     }
+                    power = Math.Round(power, 3);
 
                     var soc = await getValueFromRegister(1, 37760, 1, 0) / 10;
+                    Log.Information($"New measurement: PV Power = {power} kW, SOC = {soc} %");
 
                     var result = await _httpClient.GetAsync(_relayBaseUri);
                     var currentState = await result.Content.ReadFromJsonAsync<RelayResponse>();
@@ -62,20 +65,10 @@ namespace SolarHeaterControl.Client
                 }
                 catch (Exception ex)
                 {
-                    if (_logStore.GetLogs().LastOrDefault()?.ErrorMessage != ex.Message)
-                    {
-                        _logStore.AddLogEntry(new LogEntry
-                        {
-                            Timestamp = DateTimeOffset.Now,
-                            CurrentPower = null,
-                            CurrentSoc = null,
-                            Action = null,
-                            ErrorMessage = ex.Message
-                        });
-                    }
+                    Log.Error(ex, "An unexpected error occured");
                 }
-                }
-                
+            }
+
         }
 
         private async Task<double> getValueFromRegister(byte slaveAddress, ushort address, ushort quantity, int position)
@@ -101,7 +94,7 @@ namespace SolarHeaterControl.Client
             await _httpClient.GetAsync(uri.Uri);
         }
 
-        private void createLog(double power, double soc, RelayAction? action = null)
+        private void createLog(double power, double soc, RelayAction action)
         {
             _logStore.AddLogEntry(new LogEntry
             {
