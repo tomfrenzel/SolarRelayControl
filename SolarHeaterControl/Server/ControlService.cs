@@ -26,6 +26,8 @@ namespace SolarHeaterControl.Client
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            await ExecuteMeasurement();
+
             using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMinutes(10));
             while (
                 !stoppingToken.IsCancellationRequested &&
@@ -33,35 +35,7 @@ namespace SolarHeaterControl.Client
             {
                 try
                 {
-                    double power = 0;
-                    for (byte inverterNumber = 1; inverterNumber <= Settings.InverterCount; inverterNumber++)
-                    {
-                        power += await getValueFromRegister(inverterNumber, 32064, 2, 1) / 1000;
-                    }
-                    power = Math.Round(power, 3);
-
-                    var soc = await getValueFromRegister(1, 37760, 1, 0) / 10;
-                    Log.Information($"New measurement: PV Power = {power} kW, SOC = {soc} %");
-
-                    var result = await _httpClient.GetAsync(_relayBaseUri);
-                    var currentState = await result.Content.ReadFromJsonAsync<RelayResponse>();
-
-                    if (power >= Settings.PowerThreshold && soc >= Settings.SocThreshold)
-                    {
-                        if (!currentState.ison)
-                        {
-                            await setRelayState("on");
-                            createLog(power, soc, RelayAction.Anschalten);
-                        }
-                    }
-                    else
-                    {
-                        if (currentState.ison)
-                        {
-                            await setRelayState("off");
-                            createLog(power, soc, RelayAction.Ausschalten);
-                        }
-                    }
+                    await ExecuteMeasurement();
                 }
                 catch (Exception ex)
                 {
@@ -69,6 +43,39 @@ namespace SolarHeaterControl.Client
                 }
             }
 
+        }
+
+        private async Task ExecuteMeasurement()
+        {
+            double power = 0;
+            for (byte inverterNumber = 1; inverterNumber <= Settings.InverterCount; inverterNumber++)
+            {
+                power += await getValueFromRegister(inverterNumber, 32064, 2, 1) / 1000;
+            }
+            power = Math.Round(power, 3);
+
+            var soc = await getValueFromRegister(1, 37760, 1, 0) / 10;
+            Log.Information($"New measurement: PV Power = {power} kW, SOC = {soc} %");
+
+            var result = await _httpClient.GetAsync(_relayBaseUri);
+            var currentState = await result.Content.ReadFromJsonAsync<RelayResponse>();
+
+            if (power >= Settings.PowerThreshold && soc >= Settings.SocThreshold)
+            {
+                if (!currentState.ison)
+                {
+                    await setRelayState("on");
+                    createLog(power, soc, RelayAction.Anschalten);
+                }
+            }
+            else
+            {
+                if (currentState.ison)
+                {
+                    await setRelayState("off");
+                    createLog(power, soc, RelayAction.Ausschalten);
+                }
+            }
         }
 
         private async Task<double> getValueFromRegister(byte slaveAddress, ushort address, ushort quantity, int position)

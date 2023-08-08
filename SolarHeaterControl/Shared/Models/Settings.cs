@@ -19,10 +19,10 @@ namespace SolarHeaterControl.Shared.Models
         public int InverterCount { get; set; } = 1;
 
         [Required]
-        public int? PowerThreshold { get; set; }
+        public double? PowerThreshold { get; set; }
 
         [Required]
         [Range(0, 100, ErrorMessage = "Der Wert muss zwischen 0 und 100 liegen")]
-        public int? SocThreshold { get; set; }
+        public double? SocThreshold { get; set; }
     }
 }
