@@ -76,6 +76,7 @@ namespace SolarHeaterControl.Client
                     createLog(power, soc, RelayAction.Ausschalten);
                 }
             }
+
         }
 
         private async Task<double> getValueFromRegister(byte slaveAddress, ushort address, ushort quantity, int position)
