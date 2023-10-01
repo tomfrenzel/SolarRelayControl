@@ -1,6 +1,6 @@
 using Serilog;
-using SolarHeaterControl.Client;
-using SolarHeaterControl.Server;
+using SolarHeaterControl.Server.Services;
+using SolarHeaterControl.Server.Stores;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.SetBasePath(builder.Environment.ContentRootPath);
@@ -15,6 +15,9 @@ Log.Logger = new LoggerConfiguration()
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddSingleton<LogStore>();
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<ModbusService>();
+builder.Services.AddSingleton<RelayService>();
 builder.Services.AddHostedService<ControlService>();
 
 var app = builder.Build();

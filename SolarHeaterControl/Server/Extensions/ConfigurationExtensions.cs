@@ -1,5 +1,5 @@
-﻿using SolarHeaterControl.Shared.Models;
-using System.Text.Json;
+﻿using System.Text.Json;
+using SolarHeaterControl.Shared.Models;
 
 namespace SolarHeaterControl.Server.Extensions
 {

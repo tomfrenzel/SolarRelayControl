@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using SolarHeaterControl.Server.Stores;
 using SolarHeaterControl.Shared.Models;
 
 namespace SolarHeaterControl.Server.Controllers

@@ -28,7 +28,11 @@ else
                 <tr>
                     <td>@entry.Timestamp.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
                     <td>@entry.CurrentPower.ToString() kW</td>
-                    <td>@entry.CurrentSoc.ToString() %</td>
+                    <td>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: @entry.CurrentSoc.ToString()%;" aria-valuenow="@entry.CurrentSoc.ToString()" aria-valuemin="0" aria-valuemax="100">@entry.CurrentSoc.ToString()%</div>
+                        </div>
+                    </td>
                     <td>@entry.Action.ToString() </td>
                 </tr>
             }
