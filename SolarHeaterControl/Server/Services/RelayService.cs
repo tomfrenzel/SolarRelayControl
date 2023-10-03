@@ -1,4 +1,5 @@
-﻿using SolarHeaterControl.Server.Stores;
+﻿using Serilog;
+using SolarHeaterControl.Server.Stores;
 using SolarHeaterControl.Shared.Models;
 using System.Net.Http;
 
@@ -64,6 +65,7 @@ namespace SolarHeaterControl.Server.Services
                 throw new ArgumentNullException(nameof(staus));
             }
 
+            Log.Information($"Relay Status: Output = {staus.Output}, Temperature = {staus.Temperature.TC} °C, Power = {staus.Apower?.ToString() ?? "N/A"}");
             return staus;
         }
     }

@@ -13,7 +13,7 @@
 
     <div class="container m-lg-0">
         <div class="row">
-            <div class="col col-6">
+            <div class="col col-auto" style="width:400px">
                 <div class="form-floating mb-3">
                     <InputText id="relayIp" class="form-control" placeholder="192.168.1.1"
                     @bind-Value="settings.RelayIp" />
@@ -25,7 +25,7 @@
         </div>
         <div class="row">
 
-            <div class="col col-6">
+            <div class="col col-auto" style="width:400px">
                 <div class="form-floating mb-3">
                     <InputText id="inverterIp" class="form-control" placeholder="192.168.1.1"
                     @bind-Value="settings.DongleIp" />
@@ -37,7 +37,7 @@
         </div>
         <div class="row">
 
-            <div class="col col-6">
+            <div class="col col-auto" style="width:400px">
                 <div class="form-floating mb-3">
                     <InputNumber id="inverterPort" class="form-control" placeholder="502"
                     @bind-Value="settings.DongleModbusPort" />
@@ -48,7 +48,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col col-6">
+            <div class="col col-auto" style="width:400px">
                 <div class="form-floating mb-3">
                     <InputNumber id="powerThreshold" class="form-control" placeholder="3"
                     @bind-Value="settings.PowerThreshold" />
@@ -59,12 +59,12 @@
             </div>
         </div>
         <div class="row">
-            <div class="col col-6">
+            <div class="col col-auto" style="width:400px">
                 <div class="form-floating">
                     <InputNumber id="socThroshold" class="form-control" placeholder="50"
                     @bind-Value="settings.SocThreshold" />
                     <label class="col-sm-8 col-form-label">
-                        Minimum Akku Ladung in Prozent
+                        Minimum Akku Ladung in %
                     </label>
                 </div>
             </div>
@@ -90,7 +90,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col col-4">
+            <div class="col col-auto" style="width:180px">
                 <div class="form-floating mb-3">
                     <InputNumber class="form-control" placeholder="1"
                     @bind-Value="settings.Inverters.Inverter1.ModbusId" />
@@ -115,7 +115,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col col-4">
+            <div class="col col-auto" style="width:180px">
                 <div class="form-floating mb-3">
                     <InputNumber class="form-control col-xs-4" placeholder="1"
                     @bind-Value="settings.Inverters.Inverter2.ModbusId" />
@@ -140,7 +140,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col col-4">
+            <div class="col col-auto" style="width:180px">
                 <div class="form-floating">
                     <InputNumber class="form-control" placeholder="1"
                     @bind-Value="settings.Inverters.Inverter3.ModbusId" />

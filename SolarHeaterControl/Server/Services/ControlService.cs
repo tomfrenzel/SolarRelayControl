@@ -66,7 +66,6 @@ namespace SolarHeaterControl.Server.Services
             {
                 await relayService.SetRelayState(RelayAction.Ausschalten, power, soc);
             }
-
         }
     }
 }
