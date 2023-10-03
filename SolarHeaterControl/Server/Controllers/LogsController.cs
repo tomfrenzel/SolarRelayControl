@@ -6,19 +6,19 @@ namespace SolarHeaterControl.Server.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class HistoryController : ControllerBase
+    public class LogsController : ControllerBase
     {
-        public HistoryController(LogStore logStore)
-        {
-            _logStore = logStore;
-        }
+        private readonly LogStore logStore;
 
-        private readonly LogStore _logStore;
+        public LogsController(LogStore logStore)
+        {
+            this.logStore = logStore;
+        }
 
         [HttpGet]
         public IEnumerable<LogEntry> Get()
         {
-            return _logStore.GetLogs();
+            return logStore.GetLogs();
         }
     }
 }

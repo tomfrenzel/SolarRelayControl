@@ -10,9 +10,9 @@ namespace SolarHeaterControl.Server.Services
         private readonly IConfiguration configuration;
         private readonly LogStore logStore;
 
-        private record struct RelayResponse(bool ison);
         private Settings Settings => configuration.Get<Settings>();
-        private Uri _relayBaseUri => new UriBuilder("http", Settings.RelayIp, 80, "relay/0").Uri;
+        private Uri relayControlUri => new UriBuilder("http", Settings.RelayIp, 80, "relay/0").Uri;
+        private Uri relayStatuslUri => new UriBuilder("http", Settings.RelayIp, 80, "rpc/Switch.GetStatus").Uri;
 
         public RelayService(HttpClient httpClient, IConfiguration configuration, LogStore logStore)
         {
@@ -23,19 +23,18 @@ namespace SolarHeaterControl.Server.Services
         public async Task SetRelayState(RelayAction action, double power, double soc)
         {
             string state = string.Empty;
-            var result = await httpClient.GetAsync(_relayBaseUri);
-            var currentState = await result.Content.ReadFromJsonAsync<RelayResponse>();
+            RelayStatusResponse currentStatus = await GetRelayStatus();
 
-            if (!currentState.ison && action == RelayAction.Anschalten)
+            if (!currentStatus.Output && action == RelayAction.Anschalten)
             {
                 state = "on";
             }
-            else if (currentState.ison && action == RelayAction.Ausschalten)
+            else if (currentStatus.Output && action == RelayAction.Ausschalten)
             {
                 state = "off";
             }
 
-            var uri = new UriBuilder(_relayBaseUri);
+            var uri = new UriBuilder(relayControlUri);
             uri.Query = $"turn={state}";
 
             await httpClient.GetAsync(uri.Uri);
@@ -47,6 +46,21 @@ namespace SolarHeaterControl.Server.Services
                 CurrentSoc = soc,
                 Action = action
             });
+        }
+
+        public async Task<RelayStatusResponse> GetRelayStatus()
+        {
+            var uri = new UriBuilder(relayStatuslUri);
+            uri.Query = $"id=0";
+
+            var result = await httpClient.GetAsync(uri.Uri);
+            var staus = await result.Content.ReadFromJsonAsync<RelayStatusResponse>();
+            if (staus == null)
+            {
+                throw new ArgumentNullException(nameof(staus));
+            }
+
+            return staus;
         }
     }
 }

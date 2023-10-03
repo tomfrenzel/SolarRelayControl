@@ -13,6 +13,102 @@
 }
 else
 {
+    @if (relayStatus != null)
+    {
+        <div class="table-responsive">
+            <table class="table table-borderless table-sm" style="width: auto">
+                <tbody>
+                    <tr>
+                        <th scope="row">
+                            <p>Relais Status: </p>
+                        </th>
+                        @if (relayStatus.Output)
+                        {
+                            <td style="text-align: center">
+                                <i class="fa-solid fa-bolt" style="color: #ffd500;"></i>
+                            </td>
+                            <td>
+                                <p>An</p>
+                            </td>
+                        }
+                        else
+                        {
+                            <td style="text-align: center">
+                                <i class="fa-solid fa-bolt"></i>
+                            </td>
+                            <td>
+                                <p>Aus</p>
+                            </td>
+                        }
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <p>Aktuelle Leistung: </p>
+                        </th>
+                        @if (relayStatus.Apower != null)
+                        {
+                            <td style="text-align: center">
+                                @if (relayStatus.Apower == 0)
+                                {
+                                    <i class="fa-solid fa-bolt"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa-solid fa-bolt" style="color: #ffd500;"></i>
+                                }
+                            </td>
+                            <td>
+                                <p>@Math.Round(relayStatus.Apower.Value / 1000, 2) kW</p>
+                            </td>
+                        }
+                        else
+                        {
+                            <td style="text-align: center">
+                                <i class="fa-solid fa-bolt"></i>
+                            </td>
+                            <td>
+                                <p>N/A</p>
+                            </td>
+                        }
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <p>Kummulierte Leistung: </p>
+                        </th>
+                        @if (relayStatus.Aenergy != null)
+                        {
+                            <td style="text-align: center">
+                                <i class="fa-solid fa-plug"></i>
+                            </td>
+                            <td>
+                                <p>@Math.Round(relayStatus.Aenergy.Total / 1000, 2) kW</p>
+                            </td>
+                        }
+                        else
+                        {
+                            <td style="text-align: center">
+                                <i class="fa-solid fa-plug"></i>
+                            </td>
+                            <td>
+                                <p>N/A</p>
+                            </td>
+                        }
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <p>Relais Temperatur: </p>
+                        </th>
+                        <td style="text-align: center">
+                            <i class="fa-solid fa-temperature-half"></i>
+                        </td>
+                        <td>
+                            <p>@relayStatus.Temperature.TC °C</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
     <table class="table">
         <thead>
             <tr>
@@ -42,10 +138,13 @@ else
 
 @code {
     private LogEntry[]? logs;
+    private RelayStatusResponse? relayStatus;
 
     protected override async Task OnInitializedAsync()
     {
-        logs = await Http.GetFromJsonAsync<LogEntry[]>("History");
+        logs = await Http.GetFromJsonAsync<LogEntry[]>("Logs");
         logs = logs?.OrderByDescending(l => l.Timestamp).ToArray();
+
+        relayStatus = await Http.GetFromJsonAsync<RelayStatusResponse>("RelayStatus");
     }
 }
