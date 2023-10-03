@@ -33,6 +33,10 @@ namespace SolarHeaterControl.Server.Services
             {
                 state = "off";
             }
+            else
+            {
+                return;
+            }
 
             var uri = new UriBuilder(relayControlUri);
             uri.Query = $"turn={state}";

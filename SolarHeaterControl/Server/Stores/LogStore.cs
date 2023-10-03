@@ -10,7 +10,6 @@ namespace SolarHeaterControl.Server.Stores
         public void AddLogEntry(LogEntry entry)
         {
             _logs.Add(entry);
-
             Log.Information($"New measurement: PV Power = {entry.CurrentPower} kW, SOC = {entry.CurrentSoc} %, Action = {entry.Action}");
         }
     }
