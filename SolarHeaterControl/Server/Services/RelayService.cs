@@ -1,4 +1,6 @@
-﻿using Serilog;
+﻿using Microsoft.AspNetCore.SignalR;
+using Serilog;
+using SolarHeaterControl.Server.Hubs;
 using SolarHeaterControl.Server.Stores;
 using SolarHeaterControl.Shared.Models;
 using System.Net.Http;
@@ -10,18 +12,20 @@ namespace SolarHeaterControl.Server.Services
         private readonly HttpClient httpClient;
         private readonly IConfiguration configuration;
         private readonly LogStore logStore;
+        private readonly IHubContext<CommunicationHub> hubContext;
 
         private Settings Settings => configuration.Get<Settings>();
         private Uri relayControlUri => new UriBuilder("http", Settings.RelayIp, 80, "relay/0").Uri;
         private Uri relayStatuslUri => new UriBuilder("http", Settings.RelayIp, 80, "rpc/Switch.GetStatus").Uri;
 
-        public RelayService(HttpClient httpClient, IConfiguration configuration, LogStore logStore)
+        public RelayService(HttpClient httpClient, IConfiguration configuration, LogStore logStore, IHubContext<CommunicationHub> hubContext)
         {
             this.httpClient = httpClient;
             this.configuration = configuration;
             this.logStore = logStore;
+            this.hubContext = hubContext;
         }
-        public async Task SetRelayState(RelayAction action, double power, double soc)
+        public async Task SetRelayState(RelayAction action)
         {
             string state = string.Empty;
             RelayStatusResponse currentStatus = await GetRelayStatus();
@@ -44,13 +48,8 @@ namespace SolarHeaterControl.Server.Services
 
             await httpClient.GetAsync(uri.Uri);
 
-            logStore.AddLogEntry(new LogEntry
-            {
-                Timestamp = DateTimeOffset.Now,
-                CurrentPower = power,
-                CurrentSoc = soc,
-                Action = action
-            });
+            var newRelayStatus = await GetRelayStatus();
+            await hubContext.Clients.All.SendAsync("ReceiveRelayStatus", newRelayStatus);
         }
 
         public async Task<RelayStatusResponse> GetRelayStatus()
@@ -59,14 +58,14 @@ namespace SolarHeaterControl.Server.Services
             uri.Query = $"id=0";
 
             var result = await httpClient.GetAsync(uri.Uri);
-            var staus = await result.Content.ReadFromJsonAsync<RelayStatusResponse>();
-            if (staus == null)
+            var status = await result.Content.ReadFromJsonAsync<RelayStatusResponse>();
+            if (status == null)
             {
-                throw new ArgumentNullException(nameof(staus));
+                throw new ArgumentNullException(nameof(status));
             }
 
-            Log.Information($"Relay Status: Output = {staus.Output}, Temperature = {staus.Temperature.TC} °C, Power = {staus.Apower?.ToString() ?? "N/A"}");
-            return staus;
+            Log.Information($"Relay Status: Output = {status.Output}, Temperature = {status.Temperature.TC} °C, Power = {status.Apower?.ToString() ?? "N/A"}");
+            return status;
         }
     }
 }

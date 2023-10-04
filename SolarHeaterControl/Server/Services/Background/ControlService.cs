@@ -1,21 +1,28 @@
-﻿using Serilog;
+﻿using Microsoft.AspNetCore.SignalR;
+using Serilog;
+using SolarHeaterControl.Server.Hubs;
+using SolarHeaterControl.Server.Stores;
 using SolarHeaterControl.Shared.Models;
 
-namespace SolarHeaterControl.Server.Services
+namespace SolarHeaterControl.Server.Services.Background
 {
     public class ControlService : BackgroundService
     {
         private readonly ModbusService modbusService;
         private readonly RelayService relayService;
         private readonly IConfiguration configuration;
- 
+        private readonly LogStore logStore;
+        private readonly CommunicationHub communicationHub;
+
         private Settings Settings => configuration.Get<Settings>();
 
-        public ControlService(IConfiguration configuration, ModbusService modbusService, RelayService relayService)
+        public ControlService(IConfiguration configuration, ModbusService modbusService, RelayService relayService, LogStore logStore, CommunicationHub communicationHub)
         {
             this.configuration = configuration;
             this.modbusService = modbusService;
             this.relayService = relayService;
+            this.logStore = logStore;
+            this.communicationHub = communicationHub;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -56,16 +63,28 @@ namespace SolarHeaterControl.Server.Services
             power = Math.Round(power, 3);
 
             var soc = await modbusService.GetSoc(Settings.Inverters.Inverter1.ModbusId);
-            Log.Information($"New measurement: PV Power = {power} kW, SOC = {soc} %");        
+            Log.Information($"New measurement: PV Power = {power} kW, SOC = {soc} %");
 
+            RelayAction action;
             if (power >= Settings.PowerThreshold && soc >= Settings.SocThreshold)
             {
-                await relayService.SetRelayState(RelayAction.Anschalten, power, soc);
+                action = RelayAction.Anschalten;
             }
             else
             {
-                await relayService.SetRelayState(RelayAction.Ausschalten, power, soc);
-            }
+                action = RelayAction.Ausschalten;
+            }          
+            
+            await relayService.SetRelayState(action);
+            var entry = new LogEntry
+            {
+                Timestamp = DateTimeOffset.Now,
+                CurrentPower = power,
+                CurrentSoc = soc,
+                Action = action
+            };
+            logStore.AddLogEntry(entry);
+            await communicationHub.SendLog(entry);
         }
     }
 }
