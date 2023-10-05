@@ -11,18 +11,16 @@ namespace SolarHeaterControl.Server.Services
     {
         private readonly HttpClient httpClient;
         private readonly IConfiguration configuration;
-        private readonly LogStore logStore;
         private readonly IHubContext<CommunicationHub> hubContext;
 
         private Settings Settings => configuration.Get<Settings>();
         private Uri relayControlUri => new UriBuilder("http", Settings.RelayIp, 80, "relay/0").Uri;
         private Uri relayStatuslUri => new UriBuilder("http", Settings.RelayIp, 80, "rpc/Switch.GetStatus").Uri;
 
-        public RelayService(HttpClient httpClient, IConfiguration configuration, LogStore logStore, IHubContext<CommunicationHub> hubContext)
+        public RelayService(HttpClient httpClient, IConfiguration configuration, IHubContext<CommunicationHub> hubContext)
         {
             this.httpClient = httpClient;
             this.configuration = configuration;
-            this.logStore = logStore;
             this.hubContext = hubContext;
         }
         public async Task SetRelayState(RelayAction action)

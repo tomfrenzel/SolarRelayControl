@@ -33,58 +33,58 @@ namespace SolarHeaterControl.Server.Services.Background
                 !stoppingToken.IsCancellationRequested &&
                 await timer.WaitForNextTickAsync(stoppingToken))
             {
-                try
-                {
-                    await ExecuteMeasurement();
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "An unexpected error occured");
-                }
+                await ExecuteMeasurement();
             }
 
         }
 
         private async Task ExecuteMeasurement()
         {
-            double power = 0;
-            if (Settings.Inverters.Inverter1.IsActive)
+            try
             {
-                power += await modbusService.GetPvInput(Settings.Inverters.Inverter1.ModbusId);
-            }
-            if (Settings.Inverters.Inverter2.IsActive)
-            {
-                power += await modbusService.GetPvInput(Settings.Inverters.Inverter2.ModbusId);
-            }
-            if (Settings.Inverters.Inverter3.IsActive)
-            {
-                power += await modbusService.GetPvInput(Settings.Inverters.Inverter3.ModbusId);
-            }
-            power = Math.Round(power, 3);
+                double power = 0;
+                if (Settings.Inverters.Inverter1.IsActive)
+                {
+                    power += await modbusService.GetPvInput(Settings.Inverters.Inverter1.ModbusId);
+                }
+                if (Settings.Inverters.Inverter2.IsActive)
+                {
+                    power += await modbusService.GetPvInput(Settings.Inverters.Inverter2.ModbusId);
+                }
+                if (Settings.Inverters.Inverter3.IsActive)
+                {
+                    power += await modbusService.GetPvInput(Settings.Inverters.Inverter3.ModbusId);
+                }
+                power = Math.Round(power, 3);
 
-            var soc = await modbusService.GetSoc(Settings.Inverters.Inverter1.ModbusId);
-            Log.Information($"New measurement: PV Power = {power} kW, SOC = {soc} %");
+                var soc = await modbusService.GetSoc(Settings.Inverters.Inverter1.ModbusId);
+                Log.Information($"New measurement: PV Power = {power} kW, SOC = {soc} %");
 
-            RelayAction action;
-            if (power >= Settings.PowerThreshold && soc >= Settings.SocThreshold)
-            {
-                action = RelayAction.Anschalten;
+                RelayAction action;
+                if (power >= Settings.PowerThreshold && soc >= Settings.SocThreshold)
+                {
+                    action = RelayAction.Anschalten;
+                }
+                else
+                {
+                    action = RelayAction.Ausschalten;
+                }
+
+                await relayService.SetRelayState(action);
+                var entry = new LogEntry
+                {
+                    Timestamp = DateTimeOffset.Now,
+                    CurrentPower = power,
+                    CurrentSoc = soc,
+                    Action = action
+                };
+                logStore.AddLogEntry(entry);
+                await communicationHub.SendLog(entry);
             }
-            else
+            catch (Exception ex)
             {
-                action = RelayAction.Ausschalten;
-            }          
-            
-            await relayService.SetRelayState(action);
-            var entry = new LogEntry
-            {
-                Timestamp = DateTimeOffset.Now,
-                CurrentPower = power,
-                CurrentSoc = soc,
-                Action = action
-            };
-            logStore.AddLogEntry(entry);
-            await communicationHub.SendLog(entry);
+                Log.Error(ex, "An unexpected error occured");
+            }
         }
     }
 }
