@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using SolarHeaterControl.Shared.Models;
-@inject HttpClient Http
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Navigation
 
 <PageTitle>Einstellungen</PageTitle>
 
@@ -156,16 +157,27 @@
 </EditForm>
 
 @code {
-    private Settings? settings = new();
+    private Settings settings = new();
+    private HubConnection? hubConnection;
 
     protected override async Task OnInitializedAsync()
     {
-        settings = await Http.GetFromJsonAsync<Settings>("Settings");
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/settingshub"))
+            .Build();
+
+        await hubConnection.StartAsync();
+
+        settings = await hubConnection.InvokeAsync<Settings>("GetSettings");
     }
 
     private async Task HandleValidSubmit()
     {
+        if (hubConnection == null)
+        {
+            throw new InvalidOperationException("Hub is not initialized yet!");
+        }
 
-        await Http.PostAsJsonAsync("Settings", settings);
+        await hubConnection.SendAsync("UpdateSettings", settings);
     }
 }

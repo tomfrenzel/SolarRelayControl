@@ -22,7 +22,6 @@ builder.Services.AddResponseCompression(opts =>
        new[] { "application/octet-stream" });
 });
 
-builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<LogStore>();
@@ -48,16 +47,15 @@ else
 }
 
 app.UseHttpsRedirection();
-
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
-
 app.UseRouting();
 
-
 app.MapRazorPages();
-app.MapControllers();
+
 app.MapHub<CommunicationHub>("/communicationhub");
+app.MapHub<SettingsHub>("/settingshub");
+
 app.MapFallbackToFile("index.html");
 
 app.Run();

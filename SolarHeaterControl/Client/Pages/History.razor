@@ -1,7 +1,6 @@
 ﻿@page "/history"
 @using SolarHeaterControl.Shared.Models
 @using Microsoft.AspNetCore.SignalR.Client
-@inject HttpClient Http
 @inject NavigationManager Navigation
 
 <PageTitle>Historie</PageTitle>
@@ -141,17 +140,12 @@ else
 }
 
 @code {
-    private LogEntry[]? logs;
+    private IEnumerable<LogEntry>? logs;
     private RelayStatusResponse? relayStatus;
     private HubConnection? hubConnection;
 
     protected override async Task OnInitializedAsync()
     {
-        logs = await Http.GetFromJsonAsync<LogEntry[]>("Logs");
-        logs = logs?.OrderByDescending(l => l.Timestamp).ToArray();
-
-        relayStatus = await Http.GetFromJsonAsync<RelayStatusResponse>("RelayStatus");
-
         hubConnection = new HubConnectionBuilder()
             .WithUrl(Navigation.ToAbsoluteUri("/communicationhub"))
             .Build();
@@ -169,5 +163,9 @@ else
         });
 
         await hubConnection.StartAsync();
+
+        relayStatus = await hubConnection.InvokeAsync<RelayStatusResponse>("GetRelayStatus");
+        logs = await hubConnection.InvokeAsync<IEnumerable<LogEntry>>("GetLogs");
+        logs = logs?.OrderByDescending(l => l.Timestamp).ToArray();
     }
 }

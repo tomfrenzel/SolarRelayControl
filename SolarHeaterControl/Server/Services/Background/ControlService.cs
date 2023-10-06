@@ -27,7 +27,7 @@ namespace SolarHeaterControl.Server.Services.Background
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await ExecuteMeasurement();
+            //await ExecuteMeasurement();
             using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMinutes(10));
             while (
                 !stoppingToken.IsCancellationRequested &&
