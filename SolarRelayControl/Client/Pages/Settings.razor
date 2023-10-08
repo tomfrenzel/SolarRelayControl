@@ -1,0 +1,183 @@
+﻿@page "/settings"
+@using SolarRelayControl.Shared.Models;
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Navigation
+
+<PageTitle>Einstellungen</PageTitle>
+
+<EditForm Model="@settings" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <h1>Basis Einstellungen</h1>
+    <hr />
+
+    <div class="container m-lg-0">
+        <div class="row">
+            <div class="col col-auto" style="width:400px">
+                <div class="form-floating mb-3">
+                    <InputText id="relayIp" class="form-control" placeholder="192.168.1.1"
+                    @bind-Value="settings.RelayIp" />
+                    <label>
+                        Relais IP
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="col col-auto" style="width:400px">
+                <div class="form-floating mb-3">
+                    <InputText id="inverterIp" class="form-control" placeholder="192.168.1.1"
+                    @bind-Value="settings.DongleIp" />
+                    <label class="col-sm-8 col-form-label">
+                        Dongle IP
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="col col-auto" style="width:400px">
+                <div class="form-floating mb-3">
+                    <InputNumber id="inverterPort" class="form-control" placeholder="502"
+                    @bind-Value="settings.DongleModbusPort" />
+                    <label class="col-sm-8 col-form-label">
+                        Dongle Modbus TCP Port
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col col-auto" style="width:400px">
+                <div class="form-floating mb-3">
+                    <InputNumber id="powerThreshold" class="form-control" placeholder="3"
+                    @bind-Value="settings.PowerThreshold" />
+                    <label class="col-sm-8 col-form-label">
+                        Minimum Solar Strom in kW
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col col-auto" style="width:400px">
+                <div class="form-floating">
+                    <InputNumber id="socThroshold" class="form-control" placeholder="50"
+                    @bind-Value="settings.SocThreshold" />
+                    <label class="col-sm-8 col-form-label">
+                        Minimum Akku Ladung in %
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+    <br />
+
+    <h1>Wechselrichter Einstellungen</h1>
+    <hr />
+
+    <div class="container m-lg-0">
+        <div class="row">
+            <h3>Wechselrichter 1</h3>
+            <div class="col">
+                <div class="form-check form-switch mb-3">
+                    <InputCheckbox class="form-check-input" type="checkbox" checked
+                    @bind-Value="settings.Inverters.Inverter1.IsActive" />
+                    <label class="form-check-label" for="flexCheckDefault">
+                        Verbaut
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col col-auto" style="width:180px">
+                <div class="form-floating mb-3">
+                    <InputNumber class="form-control" placeholder="1"
+                    @bind-Value="settings.Inverters.Inverter1.ModbusId" />
+                    <label class="col-sm-8 col-form-label">
+                        Modbus ID
+                    </label>
+                </div>
+            </div>
+        </div>
+        <br />
+
+        <div class="row">
+            <h3>Wechselrichter 2</h3>
+            <div class="col">
+                <div class="form-check form-switch mb-3">
+                    <InputCheckbox class="form-check-input" type="checkbox"
+                    @bind-Value="settings.Inverters.Inverter2.IsActive" />
+                    <label class="form-check-label" for="flexCheckDefault">
+                        Verbaut
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col col-auto" style="width:180px">
+                <div class="form-floating mb-3">
+                    <InputNumber class="form-control col-xs-4" placeholder="1"
+                    @bind-Value="settings.Inverters.Inverter2.ModbusId" />
+                    <label class="col-sm-8 col-form-label">
+                        Modbus ID
+                    </label>
+                </div>
+            </div>
+        </div>
+        <br />
+
+        <div class="row">
+            <h3>Wechselrichter 3</h3>
+            <div class="col">
+                <div class="form-check form-switch mb-3">
+                    <InputCheckbox class="form-check-input" type="checkbox"
+                    @bind-Value="settings.Inverters.Inverter3.IsActive" />
+                    <label class="form-check-label" for="flexCheckDefault">
+                        Verbaut
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col col-auto" style="width:180px">
+                <div class="form-floating">
+                    <InputNumber class="form-control" placeholder="1"
+                    @bind-Value="settings.Inverters.Inverter3.ModbusId" />
+                    <label class="col-sm-8 col-form-label">
+                        Modbus ID
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+    <button type="submit" class="btn btn-success">Speichern</button>
+</EditForm>
+
+@code {
+    private SolarRelayControl.Shared.Models.Settings settings = new();
+    private HubConnection? hubConnection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/settingshub"))
+            .Build();
+
+        await hubConnection.StartAsync();
+
+        settings = await hubConnection.InvokeAsync<SolarRelayControl.Shared.Models.Settings>("GetSettings");
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (hubConnection == null)
+        {
+            throw new InvalidOperationException("Hub is not initialized yet!");
+        }
+
+        await hubConnection.SendAsync("UpdateSettings", settings);
+    }
+}
