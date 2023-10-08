@@ -1,16 +1,17 @@
 ﻿using NModbus;
+using SolarRelayControl.Server.Interfaces;
 using SolarRelayControl.Shared.Models;
 using System.Net.Sockets;
 
 namespace SolarRelayControl.Server.Services
 {
-    public class ModbusService
+    public class Sun2000Service : ISolarService
     {
         private readonly IConfiguration configuration;
         private Settings Settings => configuration.Get<Settings>();
 
 
-        public ModbusService(IConfiguration configuration)
+        public Sun2000Service(IConfiguration configuration)
         {
             this.configuration = configuration;
         }

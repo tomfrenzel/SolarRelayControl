@@ -9,7 +9,7 @@ namespace SolarRelayControl.Server.Services.Background
 {
     public class ControlService : BackgroundService
     {
-        private readonly ModbusService modbusService;
+        private readonly ISolarService solarService;
         private readonly IRelayService relayService;
         private readonly IConfiguration configuration;
         private readonly LogStore logStore;
@@ -17,10 +17,10 @@ namespace SolarRelayControl.Server.Services.Background
 
         private Settings Settings => configuration.Get<Settings>();
 
-        public ControlService(IConfiguration configuration, ModbusService modbusService, IRelayService relayService, LogStore logStore, CommunicationHub communicationHub)
+        public ControlService(IConfiguration configuration, ISolarService solarService, IRelayService relayService, LogStore logStore, CommunicationHub communicationHub)
         {
             this.configuration = configuration;
-            this.modbusService = modbusService;
+            this.solarService = solarService;
             this.relayService = relayService;
             this.logStore = logStore;
             this.communicationHub = communicationHub;
@@ -46,19 +46,19 @@ namespace SolarRelayControl.Server.Services.Background
                 double power = 0;
                 if (Settings.Inverters.Inverter1.IsActive)
                 {
-                    power += await modbusService.GetPvInput(Settings.Inverters.Inverter1.ModbusId);
+                    power += await solarService.GetPvInput(Settings.Inverters.Inverter1.ModbusId);
                 }
                 if (Settings.Inverters.Inverter2.IsActive)
                 {
-                    power += await modbusService.GetPvInput(Settings.Inverters.Inverter2.ModbusId);
+                    power += await solarService.GetPvInput(Settings.Inverters.Inverter2.ModbusId);
                 }
                 if (Settings.Inverters.Inverter3.IsActive)
                 {
-                    power += await modbusService.GetPvInput(Settings.Inverters.Inverter3.ModbusId);
+                    power += await solarService.GetPvInput(Settings.Inverters.Inverter3.ModbusId);
                 }
                 power = Math.Round(power, 3);
 
-                var soc = await modbusService.GetSoc(Settings.Inverters.Inverter1.ModbusId);
+                var soc = await solarService.GetSoc(Settings.Inverters.Inverter1.ModbusId);
                 Log.Information($"New measurement: PV Power = {power} kW, SOC = {soc} %");
 
                 var currentStatus = await relayService.GetRelayStatus();

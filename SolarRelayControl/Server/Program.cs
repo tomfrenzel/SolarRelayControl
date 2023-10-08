@@ -27,7 +27,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<LogStore>();
 builder.Services.AddSingleton<CommunicationHub>();
-builder.Services.AddSingleton<ModbusService>();
+builder.Services.AddSingleton<ISolarService, Sun2000Service>();
 builder.Services.AddSingleton<IRelayService, ShellyRelayService>();
 builder.Services.AddHostedService<ControlService>();
 builder.Services.AddHostedService<RelayStatusService>();
