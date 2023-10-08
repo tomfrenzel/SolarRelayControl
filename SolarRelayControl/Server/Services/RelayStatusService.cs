@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using Serilog;
+﻿using Serilog;
 using SolarRelayControl.Server.Hubs;
 using SolarRelayControl.Server.Interfaces;
-using SolarRelayControl.Shared.Models;
 
-namespace SolarRelayControl.Server.Services.Background
+namespace SolarRelayControl.Server.Services
 {
     public class RelayStatusService : BackgroundService
     {

@@ -2,7 +2,6 @@
 using SolarRelayControl.Server.Interfaces;
 using SolarRelayControl.Server.Stores;
 using SolarRelayControl.Shared.Models;
-using System.Collections.Generic;
 
 namespace SolarRelayControl.Server.Hubs
 {

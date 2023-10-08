@@ -5,8 +5,11 @@ using SolarRelayControl.Server.Interfaces;
 using SolarRelayControl.Shared.Models;
 using System.Text.Json.Serialization;
 
-namespace SolarRelayControl.Server.Services
+namespace SolarRelayControl.Server.Services.Relay
 {
+    /// <summary>
+    /// Implementation of <see cref="IRelayService"/> for Shelly Pro Relays
+    /// </summary>
     public class ShellyRelayService : IRelayService
     {
         private readonly HttpClient httpClient;
@@ -23,6 +26,8 @@ namespace SolarRelayControl.Server.Services
             this.configuration = configuration;
             this.hubContext = hubContext;
         }
+
+        /// <inheritdoc />
         public async Task SetRelayState(RelayAction action)
         {
             var uri = new UriBuilder(relayControlUri);
@@ -35,6 +40,7 @@ namespace SolarRelayControl.Server.Services
             await hubContext.Clients.All.SendAsync("ReceiveRelayStatus", newRelayStatus);
         }
 
+        /// <inheritdoc />
         public async Task<RelayStatus> GetRelayStatus()
         {
             var uri = new UriBuilder(relayStatuslUri);

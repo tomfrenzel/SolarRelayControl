@@ -3,7 +3,8 @@ using Serilog;
 using SolarRelayControl.Server.Hubs;
 using SolarRelayControl.Server.Interfaces;
 using SolarRelayControl.Server.Services;
-using SolarRelayControl.Server.Services.Background;
+using SolarRelayControl.Server.Services.Relay;
+using SolarRelayControl.Server.Services.Solar;
 using SolarRelayControl.Server.Stores;
 
 var builder = WebApplication.CreateBuilder(args);

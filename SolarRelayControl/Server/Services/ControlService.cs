@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using Serilog;
+﻿using Serilog;
 using SolarRelayControl.Server.Hubs;
 using SolarRelayControl.Server.Interfaces;
 using SolarRelayControl.Server.Stores;
 using SolarRelayControl.Shared.Models;
 
-namespace SolarRelayControl.Server.Services.Background
+namespace SolarRelayControl.Server.Services
 {
     public class ControlService : BackgroundService
     {
@@ -43,22 +42,8 @@ namespace SolarRelayControl.Server.Services.Background
         {
             try
             {
-                double power = 0;
-                if (Settings.Inverters.Inverter1.IsActive)
-                {
-                    power += await solarService.GetPvInput(Settings.Inverters.Inverter1.ModbusId);
-                }
-                if (Settings.Inverters.Inverter2.IsActive)
-                {
-                    power += await solarService.GetPvInput(Settings.Inverters.Inverter2.ModbusId);
-                }
-                if (Settings.Inverters.Inverter3.IsActive)
-                {
-                    power += await solarService.GetPvInput(Settings.Inverters.Inverter3.ModbusId);
-                }
-                power = Math.Round(power, 3);
-
-                var soc = await solarService.GetSoc(Settings.Inverters.Inverter1.ModbusId);
+                var power = await solarService.GetPvInput();
+                var soc = await solarService.GetSoc();
                 Log.Information($"New measurement: PV Power = {power} kW, SOC = {soc} %");
 
                 var currentStatus = await relayService.GetRelayStatus();

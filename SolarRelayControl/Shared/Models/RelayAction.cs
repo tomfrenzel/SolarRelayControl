@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace SolarRelayControl.Shared.Models
+﻿namespace SolarRelayControl.Shared.Models
 {
     public enum RelayAction
     {

@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using SolarRelayControl.Server.Extensions;
-using SolarRelayControl.Server.Services;
-using SolarRelayControl.Server.Stores;
 using SolarRelayControl.Shared.Models;
-using System.Collections.Generic;
 
 namespace SolarRelayControl.Server.Hubs
 {
