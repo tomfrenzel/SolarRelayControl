@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Serilog;
 using SolarHeaterControl.Server.Hubs;
+using SolarHeaterControl.Server.Interfaces;
 using SolarHeaterControl.Server.Stores;
 using SolarHeaterControl.Shared.Models;
 
@@ -9,14 +10,14 @@ namespace SolarHeaterControl.Server.Services.Background
     public class ControlService : BackgroundService
     {
         private readonly ModbusService modbusService;
-        private readonly RelayService relayService;
+        private readonly IRelayService relayService;
         private readonly IConfiguration configuration;
         private readonly LogStore logStore;
         private readonly CommunicationHub communicationHub;
 
         private Settings Settings => configuration.Get<Settings>();
 
-        public ControlService(IConfiguration configuration, ModbusService modbusService, RelayService relayService, LogStore logStore, CommunicationHub communicationHub)
+        public ControlService(IConfiguration configuration, ModbusService modbusService, IRelayService relayService, LogStore logStore, CommunicationHub communicationHub)
         {
             this.configuration = configuration;
             this.modbusService = modbusService;
@@ -60,14 +61,21 @@ namespace SolarHeaterControl.Server.Services.Background
                 var soc = await modbusService.GetSoc(Settings.Inverters.Inverter1.ModbusId);
                 Log.Information($"New measurement: PV Power = {power} kW, SOC = {soc} %");
 
+                var currentStatus = await relayService.GetRelayStatus();
                 RelayAction action;
-                if (power >= Settings.PowerThreshold && soc >= Settings.SocThreshold)
+
+                var requiredTresholdsReached = power >= Settings.PowerThreshold && soc >= Settings.SocThreshold;
+                if (requiredTresholdsReached && !currentStatus.IsOn)
                 {
                     action = RelayAction.Anschalten;
                 }
-                else
+                else if (!requiredTresholdsReached && currentStatus.IsOn)
                 {
                     action = RelayAction.Ausschalten;
+                }
+                else
+                {
+                    return;
                 }
 
                 await relayService.SetRelayState(action);

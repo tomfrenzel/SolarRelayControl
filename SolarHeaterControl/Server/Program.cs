@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.ResponseCompression;
 using Serilog;
 using SolarHeaterControl.Server.Hubs;
+using SolarHeaterControl.Server.Interfaces;
 using SolarHeaterControl.Server.Services;
 using SolarHeaterControl.Server.Services.Background;
 using SolarHeaterControl.Server.Stores;
@@ -27,7 +28,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddSingleton<LogStore>();
 builder.Services.AddSingleton<CommunicationHub>();
 builder.Services.AddSingleton<ModbusService>();
-builder.Services.AddSingleton<RelayService>();
+builder.Services.AddSingleton<IRelayService, ShellyRelayService>();
 builder.Services.AddHostedService<ControlService>();
 builder.Services.AddHostedService<RelayStatusService>();
 

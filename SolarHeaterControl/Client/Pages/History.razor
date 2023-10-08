@@ -23,7 +23,7 @@ else
                         <th scope="row">
                             <p>Relais Status: </p>
                         </th>
-                        @if (relayStatus.Output)
+                        @if (relayStatus.IsOn)
                         {
                             <td style="text-align: center">
                                 <i class="fa-solid fa-bolt" style="color: #ffd500;"></i>
@@ -46,10 +46,10 @@ else
                         <th scope="row">
                             <p>Aktuelle Leistung: </p>
                         </th>
-                        @if (relayStatus.Apower != null)
+                        @if (relayStatus.CurrentPower != null)
                         {
                             <td style="text-align: center">
-                                @if (relayStatus.Apower == 0)
+                                @if (relayStatus.CurrentPower == 0)
                                 {
                                     <i class="fa-solid fa-bolt"></i>
                                 }
@@ -59,7 +59,7 @@ else
                                 }
                             </td>
                             <td>
-                                <p>@Math.Round(relayStatus.Apower.Value / 1000, 2) kW</p>
+                                <p>@Math.Round(relayStatus.CurrentPower.Value / 1000, 2) kW</p>
                             </td>
                         }
                         else
@@ -76,13 +76,13 @@ else
                         <th scope="row">
                             <p>Kumulierte Leistung: </p>
                         </th>
-                        @if (relayStatus.Aenergy != null)
+                        @if (relayStatus.TotalPower != null)
                         {
                             <td style="text-align: center">
                                 <i class="fa-solid fa-plug"></i>
                             </td>
                             <td>
-                                <p>@Math.Round(relayStatus.Aenergy.Total / 1000, 2) kW</p>
+                                <p>@Math.Round(relayStatus.TotalPower.Value / 1000, 2) kW</p>
                             </td>
                         }
                         else
@@ -99,12 +99,25 @@ else
                         <th scope="row">
                             <p>Relais Temperatur: </p>
                         </th>
-                        <td style="text-align: center">
-                            <i class="fa-solid fa-temperature-half"></i>
-                        </td>
-                        <td>
-                            <p>@relayStatus.Temperature.TC °C</p>
-                        </td>
+                        @if (relayStatus.Temperature != null)
+                        {
+                            <td style="text-align: center">
+                                <i class="fa-solid fa-temperature-half"></i>
+                            </td>
+                            <td>
+                                <p>@relayStatus.Temperature °C</p>
+                            </td>
+                        }
+                        else
+                        {
+                            <td style="text-align: center">
+                                <i class="fa-solid fa-temperature-half"></i>
+                            </td>
+                            <td>
+                                <p>N/A</p>
+                            </td>
+                        }
+                       
                     </tr>
                 </tbody>
             </table>
@@ -141,7 +154,7 @@ else
 
 @code {
     private IEnumerable<LogEntry>? logs;
-    private RelayStatusResponse? relayStatus;
+    private RelayStatus? relayStatus;
     private HubConnection? hubConnection;
 
     protected override async Task OnInitializedAsync()
@@ -156,7 +169,7 @@ else
             StateHasChanged();
         });
 
-        hubConnection.On<RelayStatusResponse>("ReceiveRelayStatus", status =>
+        hubConnection.On<RelayStatus>("ReceiveRelayStatus", status =>
         {
             relayStatus = status;
             StateHasChanged();
@@ -164,7 +177,7 @@ else
 
         await hubConnection.StartAsync();
 
-        relayStatus = await hubConnection.InvokeAsync<RelayStatusResponse>("GetRelayStatus");
+        relayStatus = await hubConnection.InvokeAsync<RelayStatus>("GetRelayStatus");
         logs = await hubConnection.InvokeAsync<IEnumerable<LogEntry>>("GetLogs");
         logs = logs?.OrderByDescending(l => l.Timestamp).ToArray();
     }

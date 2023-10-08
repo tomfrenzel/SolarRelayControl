@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using SolarHeaterControl.Server.Services;
+using SolarHeaterControl.Server.Interfaces;
 using SolarHeaterControl.Server.Stores;
 using SolarHeaterControl.Shared.Models;
 using System.Collections.Generic;
@@ -8,10 +8,10 @@ namespace SolarHeaterControl.Server.Hubs
 {
     public class CommunicationHub : Hub
     {
-        private readonly RelayService relayService;
+        private readonly IRelayService relayService;
         private readonly LogStore logStore;
 
-        public CommunicationHub(RelayService relayService, LogStore logStore)
+        public CommunicationHub(IRelayService relayService, LogStore logStore)
         {
             this.relayService = relayService;
             this.logStore = logStore;
@@ -22,7 +22,7 @@ namespace SolarHeaterControl.Server.Hubs
             await Clients.All.SendAsync("ReceiveLog", log);
         }
 
-        public async Task SendRelayStatus(RelayStatusResponse status)
+        public async Task SendRelayStatus(RelayStatus status)
         {
             await Clients.All.SendAsync("ReceiveRelayStatus", status);
         }
@@ -31,7 +31,7 @@ namespace SolarHeaterControl.Server.Hubs
         {
             return await Task.Run(() => logStore.GetLogs());
         }
-        public async Task<RelayStatusResponse> GetRelayStatus()
+        public async Task<RelayStatus> GetRelayStatus()
         {
             return await relayService.GetRelayStatus();
         }

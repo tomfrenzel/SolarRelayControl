@@ -1,16 +1,17 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Serilog;
 using SolarHeaterControl.Server.Hubs;
+using SolarHeaterControl.Server.Interfaces;
 using SolarHeaterControl.Shared.Models;
 
 namespace SolarHeaterControl.Server.Services.Background
 {
     public class RelayStatusService : BackgroundService
     {
-        private readonly RelayService relayService;
+        private readonly IRelayService relayService;
         private readonly CommunicationHub communicationHub;
 
-        public RelayStatusService(RelayService relayService, CommunicationHub communicationHub)
+        public RelayStatusService(IRelayService relayService, CommunicationHub communicationHub)
         {
             this.relayService = relayService;
             this.communicationHub = communicationHub;

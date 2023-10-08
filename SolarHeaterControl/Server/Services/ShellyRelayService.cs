@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Serilog;
 using SolarHeaterControl.Server.Hubs;
-using SolarHeaterControl.Server.Stores;
+using SolarHeaterControl.Server.Interfaces;
 using SolarHeaterControl.Shared.Models;
-using System.Net.Http;
+using System.Text.Json.Serialization;
 
 namespace SolarHeaterControl.Server.Services
 {
-    public class RelayService
+    public class ShellyRelayService : IRelayService
     {
         private readonly HttpClient httpClient;
         private readonly IConfiguration configuration;
@@ -17,7 +17,7 @@ namespace SolarHeaterControl.Server.Services
         private Uri relayControlUri => new UriBuilder("http", Settings.RelayIp, 80, "relay/0").Uri;
         private Uri relayStatuslUri => new UriBuilder("http", Settings.RelayIp, 80, "rpc/Switch.GetStatus").Uri;
 
-        public RelayService(HttpClient httpClient, IConfiguration configuration, IHubContext<CommunicationHub> hubContext)
+        public ShellyRelayService(HttpClient httpClient, IConfiguration configuration, IHubContext<CommunicationHub> hubContext)
         {
             this.httpClient = httpClient;
             this.configuration = configuration;
@@ -25,23 +25,8 @@ namespace SolarHeaterControl.Server.Services
         }
         public async Task SetRelayState(RelayAction action)
         {
-            string state = string.Empty;
-            RelayStatusResponse currentStatus = await GetRelayStatus();
-
-            if (!currentStatus.Output && action == RelayAction.Anschalten)
-            {
-                state = "on";
-            }
-            else if (currentStatus.Output && action == RelayAction.Ausschalten)
-            {
-                state = "off";
-            }
-            else
-            {
-                return;
-            }
-
             var uri = new UriBuilder(relayControlUri);
+            var state = action == RelayAction.Anschalten ? "on" : "off";
             uri.Query = $"turn={state}";
 
             await httpClient.GetAsync(uri.Uri);
@@ -50,7 +35,7 @@ namespace SolarHeaterControl.Server.Services
             await hubContext.Clients.All.SendAsync("ReceiveRelayStatus", newRelayStatus);
         }
 
-        public async Task<RelayStatusResponse> GetRelayStatus()
+        public async Task<RelayStatus> GetRelayStatus()
         {
             var uri = new UriBuilder(relayStatuslUri);
             uri.Query = $"id=0";
@@ -63,7 +48,31 @@ namespace SolarHeaterControl.Server.Services
             }
 
             Log.Information($"Relay Status: Output = {status.Output}, Temperature = {status.Temperature.TC} °C, Power = {status.Apower?.ToString() ?? "N/A"}");
-            return status;
+            return new RelayStatus(status.Output, status.Current, status.Aenergy?.Total, status.Temperature.TC);
         }
+
+        private record RelayStatusResponse(
+            [property: JsonPropertyName("id")] int Id,
+            [property: JsonPropertyName("source")] string Source,
+            [property: JsonPropertyName("output")] bool Output,
+            [property: JsonPropertyName("apower")] double? Apower,
+            [property: JsonPropertyName("voltage")] double? Voltage,
+            [property: JsonPropertyName("freq")] double? Freq,
+            [property: JsonPropertyName("current")] double? Current,
+            [property: JsonPropertyName("pf")] double? Pf,
+            [property: JsonPropertyName("aenergy")] Aenergy? Aenergy,
+            [property: JsonPropertyName("temperature")] Temperature Temperature
+        );
+
+        private record Aenergy(
+            [property: JsonPropertyName("total")] double Total,
+            [property: JsonPropertyName("by_minute")] IReadOnlyList<double> ByMinute,
+            [property: JsonPropertyName("minute_ts")] int MinuteTs
+        );
+
+        private record Temperature(
+            [property: JsonPropertyName("tC")] double TC,
+            [property: JsonPropertyName("tF")] double TF
+        );
     }
 }
