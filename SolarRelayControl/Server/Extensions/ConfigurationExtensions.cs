@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using SolarRelayControl.Shared.Models;
+using SolarRelayControl.Shared.Models.Settings;
 
 namespace SolarRelayControl.Server.Extensions
 {

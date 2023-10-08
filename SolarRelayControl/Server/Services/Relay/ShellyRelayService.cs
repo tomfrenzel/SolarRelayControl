@@ -3,6 +3,7 @@ using Serilog;
 using SolarRelayControl.Server.Hubs;
 using SolarRelayControl.Server.Interfaces;
 using SolarRelayControl.Shared.Models;
+using SolarRelayControl.Shared.Models.Settings;
 using System.Text.Json.Serialization;
 
 namespace SolarRelayControl.Server.Services.Relay
@@ -17,8 +18,8 @@ namespace SolarRelayControl.Server.Services.Relay
         private readonly IHubContext<CommunicationHub> hubContext;
 
         private Settings Settings => configuration.Get<Settings>();
-        private Uri relayControlUri => new UriBuilder("http", Settings.RelayIp, 80, "relay/0").Uri;
-        private Uri relayStatuslUri => new UriBuilder("http", Settings.RelayIp, 80, "rpc/Switch.GetStatus").Uri;
+        private Uri relayControlUri => new UriBuilder("http", Settings.ShellySettings.Ip, 80, "relay/0").Uri;
+        private Uri relayStatuslUri => new UriBuilder("http", Settings.ShellySettings.Ip, 80, "rpc/Switch.GetStatus").Uri;
 
         public ShellyRelayService(HttpClient httpClient, IConfiguration configuration, IHubContext<CommunicationHub> hubContext)
         {

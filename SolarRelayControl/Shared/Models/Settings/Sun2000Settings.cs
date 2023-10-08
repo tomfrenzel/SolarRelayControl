@@ -1,29 +1,18 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SolarRelayControl.Shared.Models
+namespace SolarRelayControl.Shared.Models.Settings
 {
-    public class Settings
+    public class Sun2000Settings
     {
         [Required]
         [RegularExpression(@"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$", ErrorMessage = "Eingabe hat ein falsches Format")]
-        public string? DongleIp { get; set; }
+        public string? Ip { get; set; }
 
         [Required]
-        [RegularExpression(@"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$", ErrorMessage = "Eingabe hat ein falsches Format")]
-        public string? RelayIp { get; set; }
-
-        [Required]
-        public int DongleModbusPort { get; set; } = 502;
+        public int ModbusPort { get; set; } = 502;
 
         [Required]
         public Inverters Inverters { get; set; } = new();
-
-        [Required]
-        public double? PowerThreshold { get; set; }
-
-        [Required]
-        [Range(0, 100, ErrorMessage = "Der Wert muss zwischen 0 und 100 liegen")]
-        public double? SocThreshold { get; set; }
     }
 
     public class Inverters

@@ -1,6 +1,6 @@
 ﻿using NModbus;
 using SolarRelayControl.Server.Interfaces;
-using SolarRelayControl.Shared.Models;
+using SolarRelayControl.Shared.Models.Settings;
 using System.Net.Sockets;
 
 namespace SolarRelayControl.Server.Services.Solar
@@ -23,17 +23,17 @@ namespace SolarRelayControl.Server.Services.Solar
         public async Task<double> GetPvInput()
         {
             double power = 0;
-            if (Settings.Inverters.Inverter1.IsActive)
+            if (Settings.Sun2000Settings.Inverters.Inverter1.IsActive)
             {
-                power += await getValueFromRegister(byte.Parse(Settings.Inverters.Inverter1.ModbusId.ToString()), 32064, 2, 1) / 1000;
+                power += await getValueFromRegister(byte.Parse(Settings.Sun2000Settings.Inverters.Inverter1.ModbusId.ToString()), 32064, 2, 1) / 1000;
             }
-            if (Settings.Inverters.Inverter2.IsActive)
+            if (Settings.Sun2000Settings.Inverters.Inverter2.IsActive)
             {
-                power += await getValueFromRegister(byte.Parse(Settings.Inverters.Inverter2.ModbusId.ToString()), 32064, 2, 1) / 1000;
+                power += await getValueFromRegister(byte.Parse(Settings.Sun2000Settings.Inverters.Inverter2.ModbusId.ToString()), 32064, 2, 1) / 1000;
             }
-            if (Settings.Inverters.Inverter3.IsActive)
+            if (Settings.Sun2000Settings.Inverters.Inverter3.IsActive)
             {
-                power += await getValueFromRegister(byte.Parse(Settings.Inverters.Inverter3.ModbusId.ToString()), 32064, 2, 1) / 1000;
+                power += await getValueFromRegister(byte.Parse(Settings.Sun2000Settings.Inverters.Inverter3.ModbusId.ToString()), 32064, 2, 1) / 1000;
             }
             return Math.Round(power, 3);
         }
@@ -41,12 +41,12 @@ namespace SolarRelayControl.Server.Services.Solar
         /// <inheritdoc />
         public async Task<double> GetSoc()
         {
-            return await getValueFromRegister(byte.Parse(Settings.Inverters.Inverter1.ModbusId.ToString()), 37760, 1, 0) / 10;
+            return await getValueFromRegister(byte.Parse(Settings.Sun2000Settings.Inverters.Inverter1.ModbusId.ToString()), 37760, 1, 0) / 10;
         }
 
         private async Task<double> getValueFromRegister(byte slaveAddress, ushort address, ushort quantity, int position)
         {
-            using (var client = new TcpClient(Settings.DongleIp, Settings.DongleModbusPort))
+            using (var client = new TcpClient(Settings.Sun2000Settings.Ip, Settings.Sun2000Settings.ModbusPort))
             {
                 var factory = new ModbusFactory();
                 IModbusMaster master = factory.CreateMaster(client);

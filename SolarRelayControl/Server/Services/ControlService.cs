@@ -3,6 +3,7 @@ using SolarRelayControl.Server.Hubs;
 using SolarRelayControl.Server.Interfaces;
 using SolarRelayControl.Server.Stores;
 using SolarRelayControl.Shared.Models;
+using SolarRelayControl.Shared.Models.Settings;
 
 namespace SolarRelayControl.Server.Services
 {
@@ -27,7 +28,7 @@ namespace SolarRelayControl.Server.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //await ExecuteMeasurement();
+            await ExecuteMeasurement();
             using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMinutes(10));
             while (
                 !stoppingToken.IsCancellationRequested &&
