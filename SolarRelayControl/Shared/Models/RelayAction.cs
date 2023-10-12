@@ -2,7 +2,7 @@
 {
     public enum RelayAction
     {
-        Anschalten,
-        Ausschalten
+        PowerOn,
+        PowerOff
     }
 }

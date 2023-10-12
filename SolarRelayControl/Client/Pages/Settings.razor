@@ -1,15 +1,14 @@
 ﻿@page "/settings"
-@using SolarRelayControl.Shared.Models;
-@using Microsoft.AspNetCore.SignalR.Client
 @inject NavigationManager Navigation
+@inject IStringLocalizer<Settings> Localize
 
-<PageTitle>Einstellungen</PageTitle>
+<PageTitle>@Localize[WebStrings.Settings]</PageTitle>
 
 <EditForm Model="@settings" OnValidSubmit="@HandleValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
-    <h1>Basis Einstellungen</h1>
+    <h1>@Localize[WebStrings.BaseSettingsLabel]</h1>
     <hr />
 
     <div class="container m-lg-0 p-lg-0">
@@ -19,7 +18,7 @@
                     <InputNumber id="powerThreshold" class="form-control" placeholder="3"
                     @bind-Value="settings.PowerThreshold" />
                     <label class="col-sm-8 col-form-label">
-                        Minimum Solar Strom in kW
+                        @Localize[WebStrings.MinPowerLabel]
                     </label>
                 </div>
             </div>
@@ -30,7 +29,7 @@
                     <InputNumber id="socThroshold" class="form-control" placeholder="50"
                     @bind-Value="settings.SocThreshold" />
                     <label class="col-sm-8 col-form-label">
-                        Minimum Akku Ladung in %
+                        @Localize[WebStrings.MinSOCLabel]
                     </label>
                 </div>
             </div>
@@ -38,7 +37,7 @@
         <br />
         <br />
 
-        <h1>Relay Einstellungen</h1>
+        <h1>@Localize[WebStrings.RelaySettingsLabel]</h1>
         <hr />
 
         <div class="container m-lg-0 p-lg-0">
@@ -48,7 +47,7 @@
                         <InputText id="relayIp" class="form-control" placeholder="192.168.1.1"
                         @bind-Value="settings.ShellySettings.Ip" />
                         <label>
-                            Relais IP
+                            @Localize[WebStrings.RelayIpLabel]
                         </label>
                     </div>
                 </div>
@@ -58,7 +57,7 @@
     <br />
     <br />
 
-    <h1>Wechselrichter Einstellungen</h1>
+    <h1>@Localize[WebStrings.InverterSettingsLabel]</h1>
     <hr />
 
     <div class="container m-lg-0 p-lg-0">
@@ -68,7 +67,7 @@
                     <InputText id="inverterIp" class="form-control" placeholder="192.168.1.1"
                     @bind-Value="settings.Sun2000Settings.Ip" />
                     <label class="col-sm-8 col-form-label">
-                        Dongle IP
+                        @Localize[WebStrings.DongleIpLabel]
                     </label>
                 </div>
             </div>
@@ -80,19 +79,19 @@
                     <InputNumber id="inverterPort" class="form-control" placeholder="502"
                     @bind-Value="settings.Sun2000Settings.ModbusPort" />
                     <label class="col-sm-8 col-form-label">
-                        Dongle Modbus TCP Port
+                        @Localize[WebStrings.DonglePortLabel]
                     </label>
                 </div>
             </div>
         </div>
         <div class="row">
-            <h3>Wechselrichter 1</h3>
+            <h3>@Localize[WebStrings.InverterLabel] 1</h3>
             <div class="col">
                 <div class="form-check form-switch mb-3">
                     <InputCheckbox class="form-check-input" type="checkbox" role="switch" id="inverter1enabled" checked
                     @bind-Value="settings.Sun2000Settings.Inverters.Inverter1.IsActive" />
                     <label class="form-check-label" for="inverter1enabled">
-                        Verbaut
+                        @Localize[WebStrings.InstalledLabel]
                     </label>
                 </div>
             </div>
@@ -103,7 +102,7 @@
                     <InputNumber class="form-control" placeholder="1"
                     @bind-Value="settings.Sun2000Settings.Inverters.Inverter1.ModbusId" />
                     <label class="col-sm-8 col-form-label">
-                        Modbus ID
+                        @Localize[WebStrings.ModbusIdLabel]
                     </label>
                 </div>
             </div>
@@ -111,13 +110,13 @@
         <br />
 
         <div class="row">
-            <h3>Wechselrichter 2</h3>
+            <h3>@Localize[WebStrings.InverterLabel] 2</h3>
             <div class="col">
                 <div class="form-check form-switch mb-3">
                     <InputCheckbox class="form-check-input" type="checkbox" role="switch" id="inverter2enabled"
                     @bind-Value="settings.Sun2000Settings.Inverters.Inverter2.IsActive" />
                     <label class="form-check-label" for="inverter2enabled">
-                        Verbaut
+                        @Localize[WebStrings.InstalledLabel]
                     </label>
                 </div>
             </div>
@@ -128,7 +127,7 @@
                     <InputNumber class="form-control col-xs-4" placeholder="1"
                     @bind-Value="settings.Sun2000Settings.Inverters.Inverter2.ModbusId" />
                     <label class="col-sm-8 col-form-label">
-                        Modbus ID
+                        @Localize[WebStrings.ModbusIdLabel]
                     </label>
                 </div>
             </div>
@@ -136,13 +135,13 @@
         <br />
 
         <div class="row">
-            <h3>Wechselrichter 3</h3>
+            <h3>@Localize[WebStrings.InverterLabel] 3</h3>
             <div class="col">
                 <div class="form-check form-switch mb-3">
                     <InputCheckbox class="form-check-input" type="checkbox" role="switch" id="inverter3enabled"
                     @bind-Value="settings.Sun2000Settings.Inverters.Inverter3.IsActive" />
                     <label class="form-check-label" for="inverter3enabled">
-                        Verbaut
+                        @Localize[WebStrings.InstalledLabel]
                     </label>
                 </div>
             </div>
@@ -153,14 +152,14 @@
                     <InputNumber class="form-control" placeholder="1"
                     @bind-Value="settings.Sun2000Settings.Inverters.Inverter3.ModbusId" />
                     <label class="col-sm-8 col-form-label">
-                        Modbus ID
+                        @Localize[WebStrings.ModbusIdLabel]
                     </label>
                 </div>
             </div>
         </div>
     </div>
     <br />
-    <button type="submit" class="btn btn-success">Speichern</button>
+    <button type="submit" class="btn btn-success">@Localize[WebStrings.SaveLabel]</button>
 </EditForm>
 
 @code {

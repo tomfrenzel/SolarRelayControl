@@ -53,11 +53,11 @@ namespace SolarRelayControl.Server.Services
                 var requiredTresholdsReached = power >= Settings.PowerThreshold && soc >= Settings.SocThreshold;
                 if (requiredTresholdsReached && !currentStatus.IsOn)
                 {
-                    action = RelayAction.Anschalten;
+                    action = RelayAction.PowerOn;
                 }
                 else if (!requiredTresholdsReached && currentStatus.IsOn)
                 {
-                    action = RelayAction.Ausschalten;
+                    action = RelayAction.PowerOff;
                 }
                 else
                 {

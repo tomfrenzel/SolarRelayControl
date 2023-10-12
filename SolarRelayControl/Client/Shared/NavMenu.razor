@@ -1,6 +1,8 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@inject IStringLocalizer<NavMenu> Localize
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Solar Heizungssteuerung</a>
+        <a class="navbar-brand" href="">@Localize[WebStrings.Title]</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -11,12 +13,12 @@
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Historie
+                <span class="oi oi-list-rich" aria-hidden="true"></span> @Localize[WebStrings.History]
             </NavLink>
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="settings">
-                <span class="oi oi-cog" aria-hidden="true"></span> Einstellungen
+                <span class="oi oi-cog" aria-hidden="true"></span> @Localize[WebStrings.Settings]
             </NavLink>
         </div>
     </nav>

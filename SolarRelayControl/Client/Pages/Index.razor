@@ -1,16 +1,15 @@
 ﻿@page "/"
-@using SolarRelayControl.Shared.Models
-@using Microsoft.AspNetCore.SignalR.Client
 @inject NavigationManager Navigation
+@inject IStringLocalizer<Index> Localize
 
-<PageTitle>Historie</PageTitle>
+<PageTitle>@Localize[WebStrings.History]</PageTitle>
 
-<h1>Historie</h1>
+<h1>@Localize[WebStrings.History]</h1>
 <hr />
 
 @if (logs == null)
 {
-    <p><em>Laden...</em></p>
+    <p><em>Loading...</em></p>
 }
 else
 {
@@ -21,7 +20,7 @@ else
                 <tbody>
                     <tr>
                         <th scope="row">
-                            <p>Relais Status: </p>
+                            <p>@Localize[WebStrings.RelayStatusLabel]: </p>
                         </th>
                         @if (relayStatus.IsOn)
                         {
@@ -29,7 +28,7 @@ else
                                 <i class="fa-solid fa-bolt" style="color: #ffd500;"></i>
                             </td>
                             <td>
-                                <p>An</p>
+                                <p>@Localize[WebStrings.On]</p>
                             </td>
                         }
                         else
@@ -38,13 +37,13 @@ else
                                 <i class="fa-solid fa-bolt"></i>
                             </td>
                             <td>
-                                <p>Aus</p>
+                                <p>@Localize[WebStrings.Off]</p>
                             </td>
                         }
                     </tr>
                     <tr>
                         <th scope="row">
-                            <p>Aktuelle Leistung: </p>
+                            <p>@Localize[WebStrings.CurrentPowerLabel]: </p>
                         </th>
                         @if (relayStatus.CurrentPower != null)
                         {
@@ -74,7 +73,7 @@ else
                     </tr>
                     <tr>
                         <th scope="row">
-                            <p>Kumulierte Leistung: </p>
+                            <p>@Localize[WebStrings.CumulativePower]: </p>
                         </th>
                         @if (relayStatus.TotalPower != null)
                         {
@@ -97,7 +96,7 @@ else
                     </tr>
                     <tr>
                         <th scope="row">
-                            <p>Relais Temperatur: </p>
+                            <p>@Localize[WebStrings.RelayTemperature]: </p>
                         </th>
                         @if (relayStatus.Temperature != null)
                         {
@@ -126,10 +125,10 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Zeitpunkt</th>
-                <th>PV Leistung</th>
-                <th>Akku-Füllstand</th>
-                <th>Aktion</th>
+                <th>@Localize[WebStrings.TimestampLabel]</th>
+                <th>@Localize[WebStrings.PVPowerLabel]</th>
+                <th>@Localize[WebStrings.SOCLabel]</th>
+                <th>@Localize[WebStrings.ActionLabel]</th>
             </tr>
         </thead>
         <tbody>
@@ -145,7 +144,7 @@ else
                             </div>
                         </div>
                     </td>
-                    <td>@entry.Action.ToString() </td>
+                    <td>@(entry.Action == RelayAction.PowerOn ? Localize[WebStrings.TurnOnLabel] : Localize[WebStrings.TurnOffLabel])</td>
                 </tr>
             }
         </tbody>

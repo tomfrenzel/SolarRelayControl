@@ -32,7 +32,7 @@ namespace SolarRelayControl.Server.Services.Relay
         public async Task SetRelayState(RelayAction action)
         {
             var uri = new UriBuilder(relayControlUri);
-            var state = action == RelayAction.Anschalten ? "on" : "off";
+            var state = action == RelayAction.PowerOn ? "on" : "off";
             uri.Query = $"turn={state}";
 
             await httpClient.GetAsync(uri.Uri);
