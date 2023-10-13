@@ -1,0 +1,17 @@
+{
+  "branches": ["ci"],
+"plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          { "path": "SolarRelayControl.win-x64.zip", "label": "SolarRelayControl (Windows)" },
+          { "path": "SolarRelayControl.linux-x64.zip", "label": "SolarRelayControl (Linux)" },
+          { "path": "SolarRelayControl.linux-arm64.zip", "label": "SolarRelayControl (ARM)" }
+        ]
+      }
+    ]
+  ]
+}
