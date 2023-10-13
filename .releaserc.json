@@ -7,9 +7,9 @@
       "@semantic-release/github",
       {
         "assets": [
-          { "path": "SolarRelayControl.win-x64.zip", "label": "SolarRelayControl (Windows)" },
-          { "path": "SolarRelayControl.linux-x64.zip", "label": "SolarRelayControl (Linux)" },
-          { "path": "SolarRelayControl.linux-arm64.zip", "label": "SolarRelayControl (ARM)" }
+          { "path": "SolarRelayControl.win-x64/SolarRelayControl.win-x64.zip", "label": "SolarRelayControl (Windows)" },
+          { "path": "SolarRelayControl.linux-x64/SolarRelayControl.linux-x64.zip", "label": "SolarRelayControl (Linux)" },
+          { "path": "SolarRelayControl.linux-arm64/SolarRelayControl.linux-arm64.zip", "label": "SolarRelayControl (ARM)" }
         ]
       }
     ]
