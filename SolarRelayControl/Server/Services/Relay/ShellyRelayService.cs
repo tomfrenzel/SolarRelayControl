@@ -55,7 +55,7 @@ namespace SolarRelayControl.Server.Services.Relay
             }
 
             Log.Information($"Relay Status: Output = {status.Output}, Temperature = {status.Temperature.TC} °C, Power = {status.Apower?.ToString() ?? "N/A"}");
-            return new RelayStatus(status.Output, status.Current, status.Aenergy?.Total, status.Temperature.TC);
+            return new RelayStatus(status.Output, status.Apower, status.Aenergy?.Total, status.Temperature.TC);
         }
 
         private record RelayStatusResponse(
