@@ -5,6 +5,9 @@ using SolarRelayControl.Server.Interfaces;
 
 namespace SolarRelayControl.Server.Services
 {
+    /// <summary>
+    /// Service to periodically check the relay status
+    /// </summary>
     public class RelayStatusService : BackgroundService
     {
         private readonly IRelayService relayService;

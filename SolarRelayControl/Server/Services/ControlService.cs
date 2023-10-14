@@ -8,6 +8,9 @@ using SolarRelayControl.Shared.Models.Settings;
 
 namespace SolarRelayControl.Server.Services
 {
+    /// <summary>
+    /// Service to periodically check the inverter data and control the relay accordingly
+    /// </summary>
     public class ControlService : BackgroundService
     {
         private readonly ISolarService solarService;
