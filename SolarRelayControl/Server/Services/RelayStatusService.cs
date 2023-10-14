@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using Microsoft.AspNetCore.SignalR;
+using Serilog;
 using SolarRelayControl.Server.Hubs;
 using SolarRelayControl.Server.Interfaces;
 
@@ -7,12 +8,12 @@ namespace SolarRelayControl.Server.Services
     public class RelayStatusService : BackgroundService
     {
         private readonly IRelayService relayService;
-        private readonly CommunicationHub communicationHub;
+        private readonly IHubContext<CommunicationHub> hubContext;
 
-        public RelayStatusService(IRelayService relayService, CommunicationHub communicationHub)
+        public RelayStatusService(IRelayService relayService, IHubContext<CommunicationHub> hubContext)
         {
             this.relayService = relayService;
-            this.communicationHub = communicationHub;
+            this.hubContext = hubContext;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -25,7 +26,7 @@ namespace SolarRelayControl.Server.Services
                 try
                 {
                     var status = await relayService.GetRelayStatus();
-                    await communicationHub.SendRelayStatus(status);
+                    await hubContext.Clients.All.SendAsync(nameof(CommunicationHub.SendRelayStatus), status);
                 }
                 catch (Exception ex)
                 {

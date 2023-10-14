@@ -23,10 +23,6 @@ builder.Services.AddResponseCompression(opts =>
 builder.Services.AddRazorPages();
 builder.Services.AddHttpClient();
 
-// SignalR Hubs
-builder.Services.AddSingleton<LogStore>();
-builder.Services.AddSingleton<CommunicationHub>();
-
 // Inverter services
 builder.Services.AddSingleton<ISolarService, Sun2000Service>();
 
@@ -34,6 +30,7 @@ builder.Services.AddSingleton<ISolarService, Sun2000Service>();
 builder.Services.AddSingleton<IRelayService, ShellyRelayService>();
 
 // Base services
+builder.Services.AddSingleton<LogStore>();
 builder.Services.AddHostedService<ControlService>();
 builder.Services.AddHostedService<RelayStatusService>();
 
