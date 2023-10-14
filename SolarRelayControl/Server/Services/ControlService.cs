@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using Microsoft.AspNetCore.SignalR;
+using Serilog;
 using SolarRelayControl.Server.Hubs;
 using SolarRelayControl.Server.Interfaces;
 using SolarRelayControl.Server.Stores;
@@ -13,17 +14,17 @@ namespace SolarRelayControl.Server.Services
         private readonly IRelayService relayService;
         private readonly IConfiguration configuration;
         private readonly LogStore logStore;
-        private readonly CommunicationHub communicationHub;
+        private readonly IHubContext<CommunicationHub> hubContext;
 
         private Settings Settings => configuration.Get<Settings>();
 
-        public ControlService(IConfiguration configuration, ISolarService solarService, IRelayService relayService, LogStore logStore, CommunicationHub communicationHub)
+        public ControlService(IConfiguration configuration, ISolarService solarService, IRelayService relayService, LogStore logStore, IHubContext<CommunicationHub> hubContext)
         {
             this.configuration = configuration;
             this.solarService = solarService;
             this.relayService = relayService;
             this.logStore = logStore;
-            this.communicationHub = communicationHub;
+            this.hubContext = hubContext;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -73,7 +74,7 @@ namespace SolarRelayControl.Server.Services
                     Action = action
                 };
                 logStore.AddLogEntry(entry);
-                await communicationHub.SendLog(entry);
+                await hubContext.Clients.All.SendAsync(nameof(CommunicationHub.SendLog), entry);
             }
             catch (Exception ex)
             {
